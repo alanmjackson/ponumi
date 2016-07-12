@@ -1,0 +1,53 @@
+How does the convolver work...
+
+#The poem to be convolved
+convolve_source = 
+[["po", "nu", "mi"],
+ ["mi", "po", "nu"],
+ ["nu", "mi", "po”]]
+
+Let’s say the computer randomly decides that:
+po = a
+nu = o
+mi = x
+
+#The name to convolve the poem against
+convolver = 
+["ja", "ku", "ha", "ru", "pe", "ru"]
+
+#The rhyming scheme of the poem
+rhyming_scheme = 
+(("a", "o", "x"),
+ ("x", "a", "o"),
+ ("o", "x", "a”))
+
+OUTPUT:
+
+1[this line will be convolved with “ja"]   ("a", "o", "x”) becomes (“pa", “na", “mi")
+2[this line will be convolved with "ku"] ("x", "a", "o”), becomes (“mi", “pu", “ku")
+3[this line will be convolved with "ha”] ("o", "x", "a”)) becomes (“ka", “mi", “pa”)
+    …I’m gonna repeat the poem form again to get every syllable of the convolver represented...
+4[this line will be convolved with “ru”] ("a", "o", "x”) becomes (“pu", “nu", “mi")
+5[this line will be convolved with “pe”] (“x", “a", “o”) becomes (“mi", “pe", “ke")
+6[this line will be convolved with “ru”] ("o", "x", "a”)) becomes (“ku", “mi", “pu”)
+
+Does this help? 
+
+One possible way to set this is to have defined ranges. What do you think?  For example,
+
+syllable 1 - 3 be affected by “ja" 
+syllable 4 - 6 be affected by “ku”
+syllable 7 - 9 be affected by “ha” 
+    and so on
+
+This is because the 12-syllable, 4-line rhyme scheme has an irregular pattern where the convolution changes at first syllable of every line and again at the 8th syllable.
+
+syllable 1-7 be affected by “”,
+syllable 8-12 be affected by “”,
+syllable 13-19 be affected by “”,
+syllable 20-24 be affected by “”,
+syllable 25-31 be affected by “”,
+syllable 32-36 be affected by “”,
+syllable 37-43 be affected by “”,
+syllable 44-48 be affected by “”
+

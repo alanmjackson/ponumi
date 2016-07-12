@@ -1,0 +1,41 @@
+The rhyme scheme.  
+
+Rhyme/off-rhyme are defined in relationship to an anchor syllable, usually the first syllable in a name.
+
+
+
+12-syllable lines, in a pattern that repeats every four lines.
+(x is off-rhyme, o is on-rhyme, A is anchor)
+
+1 oxooxxAoxoox
+2 ooxxxoAooxxA
+3 ooxxooxxooxx
+4 oxooxxAoxxoA
+
+
+Applying to a name:
+
+Step 1- Phoneme to Mora. Goal is 8-syllable moraic name
+
+Evie Jackson = I VI JA KA SO N
+
+This is only 6 syllables, it needs two more to make a full 8-syllable name.
+ 
+Step 2- I take two syllables from one generation up, Alan, and add that to the end. 
+
+So it becomes:
+
+I VI JA KA SO N A RA
+
+Step 3- Arbitrarily, three syllables are defined as in-rhyme (in bold), the rest off-rhyme, and "I" is the anchor
+
+_I_ _VI_ JA KA SO _N_ A RA
+
+Step 4- then you fill in each line using the syllable order left to right, starting again with each line... 
+
+vi ja n vi ka so i n a vi n ra
+vi n ja ka so vi i n vi a ra i
+vi n ja ka vi n so a vi n ra ja
+vi ja n vi ka so i n a ra vi i
+
+
