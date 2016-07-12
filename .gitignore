@@ -90,3 +90,6 @@ ENV/
 
 # Temporary files
 *.*~
+
+# C9
+.c9/

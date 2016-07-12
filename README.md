@@ -8,28 +8,10 @@ PONUMI can create, save and load poems as well as send them as data over OSC.
 
 PONUMI was developed to work in conjunction with the kyma music production system from Symbolic Sound to play the poems. 
 
+PONUMI was originally a command-line tool written in Python. 
+
 
 #prioritised TODO list
-
-    /* Load up Jakes prototype sound on my paca
-
-    /* elongating poems (elongating rhyming schemes by repeating lines)
-
-
-    /* create and use other rhyming schemes
-        UI let's you select another file. 
-
-    /* Make it so you can do someone's name ahead of time, save it to disk (not send via OSC) and then when they arrive read it back in and send over OSC. 
-        Load a saved poem
-
-
-    /* convolution: convolving a poem against a list of syllables on poem anchors, (ons, offs and all?)
-
-    /* what if you don't want the poem root randomly created?
-
-    /* save and load the whole poem object (including names, root and rhyming scheme)
-
-    /* re-implement loading a text file
 
 * Port to ipad for real-time performance of poems with Kyma.
 
@@ -54,6 +36,29 @@ PONUMI was developed to work in conjunction with the kyma music production syste
 
 * (Hard rhyme syllables (convolving with a single syllable on anchor points))
 
+----
+
+# Completed Tasks
+
+    /* Load prototype kyma "sound"
+
+    /* elongating poems (elongating rhyming schemes by repeating lines)
+
+
+    /* create and use other rhyming schemes
+        UI let's you select another file. 
+
+    /* Make it so you can do someone's name ahead of time, save it to disk (not send via OSC) and then when they arrive read it back in and send over OSC. 
+        Load a saved poem
+
+
+    /* convolution: convolving a poem against a list of syllables on poem anchors, (ons, offs and all?)
+
+    /* what if you don't want the poem root randomly created?
+
+    /* save and load the whole poem object (including names, root and rhyming scheme)
+
+    /* re-implement loading a text file
 
 
 
