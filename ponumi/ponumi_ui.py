@@ -5,11 +5,15 @@ import Tkinter
 import tkFileDialog
 import pickle
 
-import ponumi
 import OSC
 
+import ponumi
+import ponumi_midi
+import ponumi_osc
 
-_osc_destination = ('192.168.0.8', 8000)
+
+
+_osc_destination = ['192.168.0.8', 8000]
 #_osc_destination = ['127.0.0.1', 8000]
 _osc_address = '/notelist'
 _osc_go_address = '/go'
@@ -253,7 +257,7 @@ def load_poem(filename):
 
 
 def send_via_osc(poem):
-    osc = ponumi.poem_to_kyma_osc(poem)
+    osc = ponumi_osc.poem_to_kyma_osc(poem)
 
     try:
         client = OSC.OSCClient()
@@ -377,7 +381,7 @@ def main():
         elif command == "m":    #Save midi file
             filename = raw_input("enter file name:")
             notes = ponumi.poem_list_to_notes(poem.syllables)
-            ponumi.notes_to_midi_file(notes, filename + ".mid")
+            ponumi_midi.notes_to_midi_file(notes, filename + ".mid")
 
         elif command == "o":    #Send poem over OSC to a paca(rana)
             send_via_osc(poem)

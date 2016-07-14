@@ -9,6 +9,8 @@ import os
 import midi
 
 import ponumi
+import ponumi_midi
+import ponumi_osc
 from ponumi import a as a
 from ponumi import o as o
 from ponumi import x as x
@@ -41,7 +43,7 @@ class Test(unittest.TestCase):
 
 
     def test_load_poem_file(self):
-        poem_list = ponumi.load_poem_file("test_poem.txt")
+        poem_list = ponumi.load_poem_file("test/test_poem.txt")
         self.assertTrue(poem_list == [["po", "nu", "mi"], ["po", "nu", "mi"], ["po", "nu", "mi"]])
 
 
@@ -51,15 +53,15 @@ class Test(unittest.TestCase):
                            (x, x, o, o, x, x, o, o, x, x, o, o),
                            (x, o, x, x, o, x, o, a, x, o, a, x))
 
-        rhyming_scheme = ponumi.load_rhyming_scheme("test_rhyming_scheme.txt")
+        rhyming_scheme = ponumi.load_rhyming_scheme("test/test_rhyming_scheme.txt")
         self.assertTrue(rhyming_scheme == expected_scheme)
  
 
     def test_notes_to_midi_file(self):
-        test_filename = "test.mid"
+        test_filename = "test/test.mid"
         
         test_notes = [1, 1, 2, 3, 5]
-        ponumi.notes_to_midi_file(test_notes, test_filename)
+        ponumi_midi.notes_to_midi_file(test_notes, test_filename)
 
         pattern = midi.read_midifile(test_filename)
         
@@ -74,8 +76,8 @@ class Test(unittest.TestCase):
         
 
     def test_convert_poem_to_midi_file(self):
-        test_filename = "test2.mid"
-        ponumi.convert_poem_file_to_midi_file("test_poem.txt", test_filename)
+        test_filename = "test/test2.mid"
+        ponumi_midi.convert_poem_file_to_midi_file("test/test_poem.txt", test_filename)
         
         pattern = midi.read_midifile(test_filename)
         
@@ -237,8 +239,9 @@ class Test(unittest.TestCase):
 
 
     def test_note_list_to_kyma_osc(self):
-        self.assertTrue(ponumi.notelist_to_kyma_osc([1]) == [0.001])
-        self.assertTrue(ponumi.notelist_to_kyma_osc([1, 2, 3, 4]) == [0.001, 0.002, 0.003, 0.004])
+        s = ponumi_osc.osc_scaling
+        self.assertTrue(type(ponumi_osc.notelist_to_kyma_osc([1])[0]) is float )
+        self.assertTrue(ponumi_osc.notelist_to_kyma_osc([1, 2, 3, 4]) == [1/s, 2/s, 3/s, 4/s])
 
         notelist = [[ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12],
                     [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
@@ -246,13 +249,13 @@ class Test(unittest.TestCase):
                     [37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48]
                    ]
 
-        expected_osc = [0.001, 0.002, 0.003, 0.004, 0.005, 0.006, 0.007, 0.008, 0.009, 0.010, 0.011, 0.012,
-                        0.013, 0.014, 0.015, 0.016, 0.017, 0.018, 0.019, 0.020, 0.021, 0.022, 0.023, 0.024,
-                        0.025, 0.026, 0.027, 0.028, 0.029, 0.030, 0.031, 0.032, 0.033, 0.034, 0.035, 0.036,
-                        0.037, 0.038, 0.039, 0.040, 0.041, 0.042, 0.043, 0.044, 0.045, 0.046, 0.047, 0.048
+        expected_osc = [ 1/s,  2/s,  3/s,  4/s,  5/s,  6/s,  7/s,  8/s,  9/s, 10/s, 11/s, 12/s,
+                        13/s, 14/s, 15/s, 16/s, 17/s, 18/s, 19/s, 20/s, 21/s, 22/s, 23/s, 24/s,
+                        25/s, 26/s, 27/s, 28/s, 29/s, 30/s, 31/s, 32/s, 33/s, 34/s, 35/s, 36/s,
+                        37/s, 38/s, 39/s, 40/s, 41/s, 42/s, 43/s, 44/s, 45/s, 46/s, 47/s, 48/s
                        ]
 
-        osc = ponumi.notelist_to_kyma_osc(notelist)
+        osc = ponumi_osc.notelist_to_kyma_osc(notelist)
         self.assertTrue(expected_osc == osc)
 
 
@@ -397,16 +400,6 @@ class Test(unittest.TestCase):
         poem = ponumi.create_poem(root_name, ancestors, root_scheme, root_size, rhyming_scheme)
 
         self.assertTrue(poem.syllables == expected_poem)
-
-
-    def test_tokeniser(self):
-        entered_str = "ponumi"
-        tokens = ponumi.tokeniser(entered_str)
-
-        self.assertTrue(tokens == ["po", "nu", "mi"])
-
-
-
 
 
 

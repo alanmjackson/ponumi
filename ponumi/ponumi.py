@@ -1,5 +1,5 @@
 """
-ponumi, from Poems to note Numbers to Midi
+ponumi, from Names to Poems
 
 Can be called from the command line to convert poems to midi files.
 
@@ -31,10 +31,8 @@ import sys
 import random
 import collections
 
-from miditime.MIDITime import MIDITime
 
 
-tempo = 120     #default tempo in BPM.
 POEM_ROOT_LENGTH = 8
 
 ANCHOR = "a"
@@ -265,20 +263,6 @@ def load_rhyming_scheme(filename):
     return tuple(lines)
 
 
-def notes_to_midi_file(note_list, filename):
-    """Creates a midi file from a list of notes."""
-    midifile = MIDITime(tempo, filename)
-    
-    time = 0
-    midi_event_list = []
-
-    note_list = flatten(note_list)      #flatten the note list
-    for note in note_list:
-        midi_event_list.append([time, note, 200, 1])
-        time += 1
-    
-    midifile.add_track(midi_event_list)
-    midifile.save_midi()
         
 
 
