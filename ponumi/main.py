@@ -10,7 +10,6 @@ from kivy.uix.anchorlayout import AnchorLayout
 from kivy.properties import StringProperty
 from kivy.properties import ListProperty
 
-import OSC
 
 import ponumi
 import ponumi_osc
@@ -101,9 +100,8 @@ class NameInputScreen(BoxLayout):
                 print "\nsent:" 
                 print osc_data
                 print "\nto: ", ponumi_osc._osc_destination, ponumi_osc._osc_address
-            except OSC.OSCClientError, e:
+            except:
                 print "OSC error: "
-                print e    
 
 
 
