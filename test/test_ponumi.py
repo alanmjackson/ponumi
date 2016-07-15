@@ -239,7 +239,7 @@ class Test(unittest.TestCase):
 
 
     def test_note_list_to_kyma_osc(self):
-        s = ponumi_osc.osc_scaling
+        s = ponumi_osc._osc_scaling
         self.assertTrue(type(ponumi_osc.notelist_to_kyma_osc([1])[0]) is float )
         self.assertTrue(ponumi_osc.notelist_to_kyma_osc([1, 2, 3, 4]) == [1/s, 2/s, 3/s, 4/s])
 

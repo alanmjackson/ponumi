@@ -13,10 +13,7 @@ import ponumi_osc
 
 
 
-_osc_destination = ['192.168.0.8', 8000]
-#_osc_destination = ['127.0.0.1', 8000]
-_osc_address = '/notelist'
-_osc_go_address = '/go'
+ponumi_osc._osc_destination = ['192.168.0.8', 8000]
 
 _default_name = ['po', 'nu', 'mi', 'ki', 'ma', 'pa', 'ka', 'ra', 'na', 'za', 'cha']
 
@@ -257,57 +254,40 @@ def load_poem(filename):
 
 
 def send_via_osc(poem):
-    osc = ponumi_osc.poem_to_kyma_osc(poem)
 
     try:
-        client = OSC.OSCClient()
-        client.connect((_osc_destination[0], _osc_destination[1]))
+        osc_data = ponumi_osc.send_via_osc(poem)
 
-        #send poem array
-        msg = OSC.OSCMessage(_osc_address)
-        msg.append(osc)
-        client.send(msg)
-
-
-        #send the go gate signal
-        msg = OSC.OSCMessage(_osc_go_address)
-        msg.append(1.0)
-        client.send(msg)
-
-
-        print "\nsending:" 
-        print osc
-        print "\nto: ", _osc_destination, _osc_address
+        print "\nsent:" 
+        print osc_data
+        print "\nto: ", ponumi_osc._osc_destination, ponumi_osc._osc_address
     except OSC.OSCClientError, e:
         print "OSC error: "
         print e    
-    finally:
-        client.close()
 
 
 def configure_osc():
-    global _osc_destination, _osc_address
 
-    print "current osc network destination: ", _osc_destination[0]
+    print "current osc network destination: ", ponumi_osc._osc_destination[0]
     while True :
         new_osc_destination_IP = raw_input("enter IP address: ")
 
         if new_osc_destination_IP == "":
             break   #if nothing is entered leave the IP address as it is.
         elif valid_ip_address(new_osc_destination_IP):
-            _osc_destination[0] = new_osc_destination_IP
+            ponumi_osc._osc_destination[0] = new_osc_destination_IP
             break
         else:
             print "invalid IP address"
 
-    print "current osc data address: ", _osc_address
+    print "current osc data address: ", ponumi_osc._osc_address
     while True :
         new_osc_address = raw_input("enter OSC address: ")
 
         if new_osc_address == "":
             break   #if nothing is entered leave the IP address as it is.
         elif valid_osc_address(new_osc_address):
-            _osc_address = new_osc_address
+            ponumi_osc._osc_address = new_osc_address
             break
         else:
             print "invalid OSC address"
@@ -390,8 +370,9 @@ def main():
             configure_osc()
 
         elif command == "i":    #print out information on config etc
-            print "\nOSC Destination: ", _osc_destination[0]
-            print "OSC Address:     ", _osc_address
+            print "\nOSC Destination: ", ponumi_osc._osc_destination[0]
+            print "OSC Address:     ", ponumi_osc._osc_address
+            print "OSC Gate Address:     ", ponumi_osc._osc_go_address
             print("\nDefault Rhyming Scheme:")
             print_rhyming_scheme(rhyming_scheme)
             print("\nDefault Root Scheme:")

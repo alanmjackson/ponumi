@@ -216,8 +216,6 @@ def note_table_to_string():
     """
     table_str = ""
 
-    print syllables
-
     sorted_syllable_list = sorted(syllables.items(), key=lambda syl: syl[1])
     for syllable in sorted_syllable_list:
         syllable_str = syllable[0] + ":"
@@ -261,9 +259,6 @@ def load_rhyming_scheme(filename):
         lines.append(tuple(line.split()))
 
     return tuple(lines)
-
-
-        
 
 
 def flatten(in_list):
@@ -345,16 +340,13 @@ def mark_root_randomly(root_syllables):
     
     root_syllables = root_syllables[1:]
 
-    rhymes = random.sample(root_syllables, 2)
+    rhyme_positions = random.sample(range(1, len(root_syllables) + 1), 2)
 
     for syllable in root_syllables:
-        if syllable in rhymes:
-            augmented_syllable = [syllable, RHYME]
-        else:
-            augmented_syllable = [syllable, OFF_RHYME]
+        poem_root.append([syllable, OFF_RHYME])
 
-        poem_root += [augmented_syllable]
-
+    for rhyme_position in rhyme_positions:
+        poem_root[rhyme_position][1] = RHYME
 
     return poem_root
 
@@ -423,7 +415,7 @@ def create_poem(root_name, ancestors, root_scheme=None, root_size=POEM_ROOT_LENG
     Takes a name, a list of ancestors names and a rhyming scheme. 
     The name argument is a list of syllables.
     The ancestors argument is a list of names, each of which is a list of syllables.
-    The result is a poem, (which is list of syllables).
+    The result is a Poem object.
     """
     #if no rhyming scheme is given use the default one
     if rhyming_scheme == None:
@@ -497,38 +489,6 @@ def notes_to_csv(notes):
     return note_str
 
 
-def convert_poem_file_to_midi_file(poem_file, midi_file):
-    """
-    Converts a poem file to a list of notes and then writes a midi file
-    consisting of those notes. 
-    """
-    poem = load_poem_file(poem_file)
-    notes = poem_list_to_notes(poem)
-    notes_to_midi_file(notes, midi_file)
-
-
-def poem_to_kyma_osc(poem):
-    """
-    Converts a poem into a list of values suitable for sending to kyma / pacarana
-    over OSC.
-    """
-    notelist = poem_list_to_notes(poem.syllables)
-    return notelist_to_kyma_osc(notelist)
-
-
-def notelist_to_kyma_osc(notelist):
-    """
-    Creates a list of values suitable for sending to kyma / pacarana
-    over OSC. All values need to be scaled between 0 and 1, which is done
-    by dividing all note numbers by 1000. 
-    """
-    osc = []
-
-    notelist = flatten(notelist)
-    for note in notelist:
-        osc.append(note / 1.0)
-
-    return osc
 
 
 def force_rhyme(forced_syllable, forcing_syllable):
@@ -626,19 +586,4 @@ def convolve(source_poem, convolver, convolving_scheme=(1,)):
 
     return convolved_poem
 
-
-
-def main():
-    print "ponumi!"
-
-    args = sys.argv[1:]
-    if len(args) != 2: 
-        print usage
-        sys.exit("incorrect arguments")
-    else:
-        convert_poem_file_to_midi_file(args[0], args[1])
-
-
-if __name__ == '__main__':
-    main()
 
