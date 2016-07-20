@@ -10,13 +10,35 @@ from kivy.uix.anchorlayout import AnchorLayout
 from kivy.properties import StringProperty
 from kivy.properties import ListProperty
 
+import kivy.lib.osc.oscAPI as oscAPI
+
 
 import ponumi
 import ponumi_osc
 
-ponumi_osc._osc_destination = ['192.168.0.8', 8000]
-
 _ancestor = ['po', 'nu', 'mi', 'a', 'mu', 'nu', 'ma', 'ki']
+
+#_osc_destination = ['192.168.0.8', 8000]
+#_osc_destination = ['127.0.0.1', 8000]
+_osc_ip_address = '192.168.0.8'
+_osc_port = 8000
+_osc_address = '/notelist' 
+_osc_go_address = '/go'
+
+
+def send_via_osc(poem):
+    msg = ponumi_osc.poem_to_kyma_osc(poem)
+
+    #send poem array
+    oscAPI.sendMsg(_osc_address, dataArray=msg, ipAddr=_osc_ip_address, port=_osc_port, typehint=None)
+
+    #send the go gate signal
+    oscAPI.sendMsg(_osc_go_address, dataArray=[1.0], ipAddr=_osc_ip_address, port=_osc_port, typehint=None)
+    
+    return msg
+
+
+
 
 class PoemDisplay(GridLayout):
 
@@ -93,15 +115,14 @@ class NameInputScreen(BoxLayout):
             _ancestor = new_ancestor
 
     def play_pressed(self, *args):
+        pass
         if self.poem:
-            try:
-                osc_data = ponumi_osc.send_via_osc(self.poem)
+            osc_data = send_via_osc(self.poem)
 
-                print "\nsent:" 
-                print osc_data
-                print "\nto: ", ponumi_osc._osc_destination, ponumi_osc._osc_address
-            except:
-                print "OSC error: "
+            print "\nsent:" 
+            print osc_data
+            print "\nto: ", _osc_ip_address, _osc_port, _osc_address
+        
 
 
 
@@ -163,6 +184,8 @@ class SyllableEntryBox(BoxLayout):
 
 
 class PonumiPerformer(App):
+
+    oscAPI.init()
 
     def build(self):
         return NameInputScreen(orientation='vertical')
