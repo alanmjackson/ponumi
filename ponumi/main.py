@@ -7,8 +7,11 @@ from kivy.uix.button import Button
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.anchorlayout import AnchorLayout
+from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.uix.textinput import TextInput
 from kivy.properties import StringProperty
 from kivy.properties import ListProperty
+
 
 import kivy.lib.osc.oscAPI as oscAPI
 
@@ -26,54 +29,14 @@ _osc_address = '/notelist'
 _osc_go_address = '/go'
 
 
-def send_via_osc(poem):
-    msg = ponumi_osc.poem_to_kyma_osc(poem)
-
-    #send poem array
-    oscAPI.sendMsg(_osc_address, dataArray=msg, ipAddr=_osc_ip_address, port=_osc_port, typehint=None)
-
-    #send the go gate signal
-    oscAPI.sendMsg(_osc_go_address, dataArray=[1.0], ipAddr=_osc_ip_address, port=_osc_port, typehint=None)
-    
-    return msg
-
-
-
-
-class PoemDisplay(GridLayout):
-
-    syllables = ListProperty([])     #expects a 4 x 12 array of syllables
-
-    def __init__(self, **kwargs):
-        super(PoemDisplay, self).__init__(**kwargs)
-
-        self.cols = 12
-        self.padding = [100, 20]
-
-        self.display_syllables = []
-
-
-        for i in range(4):
-            display_row = []
-            for j in range(12):
-                syllable_widget = Label(text='')
-                display_row.append(syllable_widget)
-                self.add_widget(syllable_widget)
-
-            self.display_syllables.append(display_row)
-
-
-    def on_syllables(self, instance, value):
-        for i in range(4):
-            for j in range(12):
-                self.display_syllables[i][j].text = self.syllables[i][j]
-
-
+#Screens
 
 class NameInputScreen(BoxLayout):
 
     def __init__(self, **kwargs):
         super(NameInputScreen, self).__init__(**kwargs)
+
+        self.screen_manager = kwargs['screen_manager']
 
         titleLayout = BoxLayout(size_hint_y=0.05)
 
@@ -85,6 +48,11 @@ class NameInputScreen(BoxLayout):
             text='play',
             size_hint_x=0.1, 
             on_release=self.play_pressed))
+
+        titleLayout.add_widget(Button(
+            text='config',
+            size_hint_x=0.1,
+            on_release=self.config_pressed))
 
         self.add_widget(titleLayout)
 
@@ -115,7 +83,6 @@ class NameInputScreen(BoxLayout):
             _ancestor = new_ancestor
 
     def play_pressed(self, *args):
-        pass
         if self.poem:
             osc_data = send_via_osc(self.poem)
 
@@ -123,6 +90,99 @@ class NameInputScreen(BoxLayout):
             print osc_data
             print "\nto: ", _osc_ip_address, _osc_port, _osc_address
         
+    def config_pressed(self, *args):
+        self.screen_manager.current = 'config'
+
+
+
+class ConfigScreen(BoxLayout):
+
+    def __init__(self, **kwargs):
+        super(ConfigScreen, self).__init__(**kwargs)
+
+        self.orientation='vertical'
+        self.screen_manager = kwargs['screen_manager']
+
+        self.padding = 25
+        self.spacing = 50
+        self.add_widget(Button(
+            text='poem', 
+            size_hint_x=0.1,
+            size_hint_y=0.4,
+            on_release=self.entry_pressed))
+
+
+        ip_address_field = BoxLayout(orientation='horizontal')
+        ip_address_field.add_widget(Label(text='IP Address:'))
+        ip_address_field.add_widget(TextInput(multiline=False, size_hint_y=0.5))
+        ip_address_field.add_widget(Label(text='.'))
+        ip_address_field.add_widget(TextInput(multiline=False))
+        ip_address_field.add_widget(Label(text='.'))
+        ip_address_field.add_widget(TextInput(multiline=False))
+        ip_address_field.add_widget(Label(text='.'))
+        ip_address_field.add_widget(TextInput(multiline=False))
+
+        self.add_widget(ip_address_field)
+
+        port_field = BoxLayout(orientation='horizontal')
+        port_field.add_widget(Label(text='Port:'))
+        port_field.add_widget(TextInput(multiline=False))
+
+        self.add_widget(port_field)
+
+        osc_syllable_address = BoxLayout(orientation='horizontal')
+        osc_syllable_address.add_widget(Label(text='OSC Syllable Address:'))
+        osc_syllable_address.add_widget(TextInput(multiline=False))
+
+        self.add_widget(osc_syllable_address)
+
+        osc_go_address = BoxLayout(orientation='horizontal')
+        osc_go_address.add_widget(Label(text='OSC Start Address:'))
+        osc_go_address.add_widget(TextInput(multiline=False))
+
+        self.add_widget(osc_go_address)
+
+
+
+    def entry_pressed(self, *args):
+        self.screen_manager.current = 'entry'
+
+
+
+
+
+
+# Parts of screens
+
+class PoemDisplay(GridLayout):
+
+    syllables = ListProperty([])     #expects a 4 x 12 array of syllables
+
+    def __init__(self, **kwargs):
+        super(PoemDisplay, self).__init__(**kwargs)
+
+        self.cols = 12
+        self.padding = [100, 20]
+
+        self.display_syllables = []
+
+
+        for i in range(4):
+            display_row = []
+            for j in range(12):
+                syllable_widget = Label(text='')
+                display_row.append(syllable_widget)
+                self.add_widget(syllable_widget)
+
+            self.display_syllables.append(display_row)
+
+
+    def on_syllables(self, instance, value):
+        for i in range(4):
+            for j in range(12):
+                self.display_syllables[i][j].text = self.syllables[i][j]
+
+
 
 
 
@@ -182,13 +242,42 @@ class SyllableEntryBox(BoxLayout):
 
 
 
+#Functions
+
+def send_via_osc(poem):
+    msg = ponumi_osc.poem_to_kyma_osc(poem)
+
+    #send poem array
+    oscAPI.sendMsg(_osc_address, dataArray=msg, ipAddr=_osc_ip_address, port=_osc_port, typehint=None)
+
+    #send the go gate signal
+    oscAPI.sendMsg(_osc_go_address, dataArray=[1.0], ipAddr=_osc_ip_address, port=_osc_port, typehint=None)
+    
+    return msg
+
+
+
+
 
 class PonumiPerformer(App):
 
     oscAPI.init()
 
     def build(self):
-        return NameInputScreen(orientation='vertical')
+        sm = ScreenManager()
+
+        entry_screen = Screen(name='entry')
+        entry_screen.add_widget(NameInputScreen(orientation='vertical', screen_manager=sm))
+
+        config_screen = Screen(name='config')
+        config_screen.add_widget(ConfigScreen(screen_manager=sm))
+
+        sm.add_widget(entry_screen)
+        sm.add_widget(config_screen)
+
+        return sm
+
+
 
 
 if __name__ == '__main__':
