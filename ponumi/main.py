@@ -56,6 +56,11 @@ class NameInputScreen(BoxLayout):
             size_hint_x=0.1,
             on_release=self.config_pressed))
 
+        titleLayout.add_widget(Button(
+            text='regen',
+            size_hint_x=0.1,
+            on_release=self.regenerate_pressed))
+
         self.add_widget(titleLayout)
 
 
@@ -68,6 +73,12 @@ class NameInputScreen(BoxLayout):
         self.add_widget(self.syllableEntryBox)
 
 
+    def generate_and_show_poem(self, root_name, ancestor=_ancestor):
+        self.poem = ponumi.create_poem(root_name, [ancestor])        
+        self.poemDisplay.syllables = self.poem.syllables
+        self.poemTitle.text = ' '.join(self.poem.root_name)
+        
+
     def syllable_btn_pressed(self, *args):
         key = args[0]
         self.syllableEntryBox.append_syllable(key.value)
@@ -76,13 +87,19 @@ class NameInputScreen(BoxLayout):
         global _ancestor
 
         if len(self.syllableEntryBox.syllables) > 0:
-            self.poem = ponumi.create_poem(self.syllableEntryBox.syllables, [_ancestor])        
-            self.poemDisplay.syllables = self.poem.syllables
-            self.poemTitle.text = ' '.join(self.poem.root_name)
+            self.generate_and_show_poem(self.syllableEntryBox.syllables)
+
             new_ancestor = []
             for marked_syllable in self.poem.root:
                 new_ancestor.append(marked_syllable[0])
             _ancestor = new_ancestor
+            
+            #clear the entry box
+            self.syllableEntryBox.syllables = []
+
+    def regenerate_pressed(self, *args):
+        self.generate_and_show_poem(self.poem.root_name)
+
 
     def play_pressed(self, *args):
         if self.poem:
@@ -202,7 +219,6 @@ class SyllableEntryBox(BoxLayout):
         self.textWidget = Label(text='', size_hint_x=15, font_size='30sp')
         self.add_widget(self.textWidget)
         self.add_widget(Button(text='del', size_hint_x=1, on_release=self.delete))
-        self.add_widget(Button(text='clear', size_hint_x=1, on_release=self.clear))
         self.add_widget(Button(text='enter', size_hint_x=1, on_release=enter_handler))
 
     def on_syllables(self, instance, value):
@@ -214,9 +230,6 @@ class SyllableEntryBox(BoxLayout):
     def delete(self, *args):
         if len(self.syllables) > 0:
             self.syllables.pop()
-
-    def clear(self, *args):
-        self.syllables = []
 
 
 ###############################################################

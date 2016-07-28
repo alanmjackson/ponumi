@@ -93,3 +93,6 @@ ENV/
 
 # C9
 .c9/
+
+# mac stuff
+.DS_Store
