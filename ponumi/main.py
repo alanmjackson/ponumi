@@ -44,11 +44,12 @@ class NameInputScreen(BoxLayout):
         
         self.spacing = 10
 
-        screen_nav = BoxLayout(size_hint_y=0.05)
+        screen_nav = BoxLayout(size_hint_y=0.07)
 
         screen_nav.add_widget(Button(
             text='config',
-            size_hint_x=0.1,
+            size_hint_x=None,
+            size_x='20dp',
             on_release=self.config_pressed))
 
         self.add_widget(screen_nav)
@@ -112,7 +113,7 @@ class NameInputScreen(BoxLayout):
             if self.poem:
                 self.generate_and_show_poem(self.poem.root_name, _ancestor)
             else:
-                self.generate_and_show_poem(_ancestor)
+                self.generate_and_show_poem(_ancestor, _ancestor)
 
 
     def play_pressed(self, *args):
