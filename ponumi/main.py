@@ -11,6 +11,7 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.textinput import TextInput
 from kivy.properties import StringProperty
 from kivy.properties import ListProperty
+from kivy.properties import ObjectProperty
 
 
 import kivy.lib.osc.oscAPI as oscAPI
@@ -21,12 +22,15 @@ import ponumi_osc
 
 _ancestor = ['po', 'nu', 'mi', 'a', 'mu', 'nu', 'ma', 'ki']
 
-#_osc_destination = ['192.168.0.8', 8000]
-#_osc_destination = ['127.0.0.1', 8000]
-_osc_ip_address = '192.168.0.8'
-_osc_port = 8000
-_osc_address = '/notelist' 
-_osc_go_address = '/go'
+#mac 169.254.211.66
+#kyma 169.254.157.100
+#ipad 169.254.163.159
+#touchosc discovered 169.254.9.91
+
+_default_osc_ip_address = '169.254.9.91'
+_default_osc_port = '55388'
+_default_osc_data_address = '/notelist' 
+_default_osc_go_address = '/go'
 
 
 #Screens
@@ -35,8 +39,6 @@ class NameInputScreen(BoxLayout):
 
     def __init__(self, **kwargs):
         super(NameInputScreen, self).__init__(**kwargs)
-
-        self.screen_manager = kwargs['screen_manager']
 
         titleLayout = BoxLayout(size_hint_y=0.05)
 
@@ -85,74 +87,50 @@ class NameInputScreen(BoxLayout):
     def play_pressed(self, *args):
         if self.poem:
             osc_data = send_via_osc(self.poem)
-
-            print "\nsent:" 
-            print osc_data
-            print "\nto: ", _osc_ip_address, _osc_port, _osc_address
         
     def config_pressed(self, *args):
-        self.screen_manager.current = 'config'
+        app = kivy.app.App.get_running_app()
+        
+        app.previous_screen = app.screen_manager.current
+        app.screen_manager.current = 'config_screen'
 
 
 
 class ConfigScreen(BoxLayout):
 
-    def __init__(self, **kwargs):
-        super(ConfigScreen, self).__init__(**kwargs)
-
-        self.orientation='vertical'
-        self.screen_manager = kwargs['screen_manager']
-
-        self.padding = 25
-        self.spacing = 50
-        self.add_widget(Button(
-            text='poem', 
-            size_hint_x=0.1,
-            size_hint_y=0.4,
-            on_release=self.entry_pressed))
+    osc_ip_address = ObjectProperty(None)
+    osc_port = ObjectProperty(None)
+    osc_data_address = ObjectProperty(None)
+    osc_go_address = ObjectProperty(None)
 
 
-        ip_address_field = BoxLayout(orientation='horizontal')
-        ip_address_field.add_widget(Label(text='IP Address:'))
-        ip_address_field.add_widget(TextInput(multiline=False, size_hint_y=0.5))
-        ip_address_field.add_widget(Label(text='.'))
-        ip_address_field.add_widget(TextInput(multiline=False))
-        ip_address_field.add_widget(Label(text='.'))
-        ip_address_field.add_widget(TextInput(multiline=False))
-        ip_address_field.add_widget(Label(text='.'))
-        ip_address_field.add_widget(TextInput(multiline=False))
+    def ok_pressed(self, *args):
+        app = kivy.app.App.get_running_app()
 
-        self.add_widget(ip_address_field)
+        app.osc_ip_address = self.osc_ip_address.text
+        app.osc_port = self.osc_port.text
+        app.osc_data_address = self.osc_data_address.text
+        app.osc_go_address = self.osc_go_address.text
 
-        port_field = BoxLayout(orientation='horizontal')
-        port_field.add_widget(Label(text='Port:'))
-        port_field.add_widget(TextInput(multiline=False))
+        app.screen_manager.current = app.previous_screen
 
-        self.add_widget(port_field)
+    def cancel_pressed(self, *args):
+        app = kivy.app.App.get_running_app()
 
-        osc_syllable_address = BoxLayout(orientation='horizontal')
-        osc_syllable_address.add_widget(Label(text='OSC Syllable Address:'))
-        osc_syllable_address.add_widget(TextInput(multiline=False))
+        self.osc_ip_address.text = app.osc_ip_address
+        self.osc_port.text = app.osc_port
+        self.osc_data_address.text = app.osc_data_address
+        self.osc_go_address.text = app.osc_go_address
 
-        self.add_widget(osc_syllable_address)
-
-        osc_go_address = BoxLayout(orientation='horizontal')
-        osc_go_address.add_widget(Label(text='OSC Start Address:'))
-        osc_go_address.add_widget(TextInput(multiline=False))
-
-        self.add_widget(osc_go_address)
-
-
-
-    def entry_pressed(self, *args):
-        self.screen_manager.current = 'entry'
+        app.screen_manager.current = app.previous_screen
 
 
 
 
-
-
+###############################################################
 # Parts of screens
+###############################################################
+
 
 class PoemDisplay(GridLayout):
 
@@ -241,41 +219,72 @@ class SyllableEntryBox(BoxLayout):
         self.syllables = []
 
 
-
+###############################################################
 #Functions
+###############################################################
+
 
 def send_via_osc(poem):
+    app = kivy.app.App.get_running_app()
+
+    ip_address = app.osc_ip_address
+    port = int(app.osc_port)
+    data_address = app.osc_data_address
+    go_address = app.osc_go_address
+
     msg = ponumi_osc.poem_to_kyma_osc(poem)
 
     #send poem array
-    oscAPI.sendMsg(_osc_address, dataArray=msg, ipAddr=_osc_ip_address, port=_osc_port, typehint=None)
+    oscAPI.sendMsg(data_address, dataArray=msg, ipAddr=ip_address, port=port, typehint=None)
 
     #send the go gate signal
-    oscAPI.sendMsg(_osc_go_address, dataArray=[1.0], ipAddr=_osc_ip_address, port=_osc_port, typehint=None)
-    
-    return msg
+    oscAPI.sendMsg(go_address, dataArray=[1.0], ipAddr=ip_address, port=port, typehint=None)
+
+    print "\nsent:" 
+    print msg
+    print "\nto: ", ip_address, port, data_address 
+    print "with go signal to: ", go_address
 
 
+
+###############################################################
+# Top Level Widgets
+###############################################################
+
+
+class PonumiPerformerScreenManager(ScreenManager):
+
+    def __init__(self, **kwargs):
+        super(PonumiPerformerScreenManager, self).__init__(**kwargs)
+        
+        entry_screen = Screen(name='entry_screen')
+        entry_screen.add_widget(NameInputScreen(orientation='vertical'))
+
+        config_screen = Screen(name='config_screen')
+        config_screen.add_widget(ConfigScreen())
+
+        self.add_widget(entry_screen)
+        self.add_widget(config_screen)
 
 
 
 class PonumiPerformer(App):
 
-    oscAPI.init()
+    osc_ip_address = StringProperty(_default_osc_ip_address)
+    osc_port = StringProperty(_default_osc_port)
+    osc_data_address = StringProperty(_default_osc_data_address)
+    osc_go_address = StringProperty(_default_osc_go_address)
+
+    previous_screen = StringProperty(None)
+
+    def __init__(self, **kwargs):
+        super(PonumiPerformer, self).__init__(**kwargs)
+        oscAPI.init()
+
 
     def build(self):
-        sm = ScreenManager()
-
-        entry_screen = Screen(name='entry')
-        entry_screen.add_widget(NameInputScreen(orientation='vertical', screen_manager=sm))
-
-        config_screen = Screen(name='config')
-        config_screen.add_widget(ConfigScreen(screen_manager=sm))
-
-        sm.add_widget(entry_screen)
-        sm.add_widget(config_screen)
-
-        return sm
+        self.screen_manager = PonumiPerformerScreenManager()
+        return self.screen_manager
 
 
 

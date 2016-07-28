@@ -1,3 +1,58 @@
 <SyllableKeyboard>:
     cols: 17
 
+<ConfigScreen>:
+	osc_ip_address: osc_ip_address
+	osc_port: osc_port
+	osc_data_address: osc_data_address
+	osc_go_address: osc_go_address
+
+	orientation: 'vertical'
+	GridLayout:
+		cols: 2
+		padding: '20dp'
+		spacing: '0dp', '20dp'
+
+	GridLayout:
+		cols: 2
+		
+		Label:
+			text: 'ip address'
+		TextInput:
+			id: osc_ip_address
+			text: app.osc_ip_address
+			multiline: False
+
+		Label:
+			text: 'port'
+		TextInput:
+			id: osc_port
+			text: app.osc_port
+			multiline: False
+
+		Label:
+			text: 'osc data address'
+		TextInput:
+			id: osc_data_address
+			text: app.osc_data_address
+			multiline: False
+
+		Label:
+			text: 'osc go address'
+		TextInput:
+			id: osc_go_address
+			text: app.osc_go_address
+			multiline: False
+
+	BoxLayout:
+		orientation: 'horizontal'
+		padding: '50dp', '0'
+		spacing: '100dp'
+		Button:
+			text: 'cancel'
+			size_hint_y: 0.2
+			on_release: self.parent.parent.cancel_pressed()
+		Button:
+			text: 'ok'
+			size_hint_y: 0.2
+			on_release: self.parent.parent.ok_pressed()		
