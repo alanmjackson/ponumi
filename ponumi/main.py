@@ -4,6 +4,7 @@ kivy.require('1.9.1')
 from kivy.app import App
 from kivy.uix.label import Label
 from kivy.uix.button import Button
+from kivy.uix.togglebutton import ToggleButton
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.anchorlayout import AnchorLayout
@@ -31,7 +32,7 @@ _default_osc_ip_address = '169.254.9.91'
 _default_osc_port = '55388'
 _default_osc_data_address = '/notelist' 
 _default_osc_go_address = '/go'
-
+_default_osc_syllable_address = '/syllable'
 
 #Screens
 
@@ -68,7 +69,7 @@ class NameInputScreen(BoxLayout):
 
         poem_controls = BoxLayout(size_hint_y=0.1)
 
-        self.syllableEntryBox = SyllableEntryBox(size_hint_x=15)
+        self.syllableEntryBox = SyllableEntryBox(size_hint_x=14)
         poem_controls.add_widget(self.syllableEntryBox)
 
         poem_controls.add_widget(Button(
@@ -80,6 +81,13 @@ class NameInputScreen(BoxLayout):
             text='play',
             size_hint_x=1, 
             on_release=self.play_pressed))
+
+        self.hear_button = ToggleButton(
+            text='hear',
+            size_hint_x=1)
+
+        poem_controls.add_widget(self.hear_button)
+
 
         self.add_widget(poem_controls)
 
@@ -95,6 +103,8 @@ class NameInputScreen(BoxLayout):
     def syllable_btn_pressed(self, *args):
         key = args[0]
         self.syllableEntryBox.append_syllable(key.value)
+        if self.hear_button.state == 'down':
+            play_syllable_via_osc(key.value)
 
     def enter_pressed(self, *args):
         global _ancestor
@@ -118,7 +128,7 @@ class NameInputScreen(BoxLayout):
 
     def play_pressed(self, *args):
         if self.poem:
-            osc_data = send_via_osc(self.poem)
+            osc_data = play_poem_via_osc(self.poem)
         
     def config_pressed(self, *args):
         app = kivy.app.App.get_running_app()
@@ -134,6 +144,7 @@ class ConfigScreen(BoxLayout):
     osc_port = ObjectProperty(None)
     osc_data_address = ObjectProperty(None)
     osc_go_address = ObjectProperty(None)
+    osc_syllable_address = ObjectProperty(None)
 
 
     def ok_pressed(self, *args):
@@ -143,6 +154,7 @@ class ConfigScreen(BoxLayout):
         app.osc_port = self.osc_port.text
         app.osc_data_address = self.osc_data_address.text
         app.osc_go_address = self.osc_go_address.text
+        app.osc_syllable_address = self.osc_syllable_address.text
 
         app.screen_manager.current = app.previous_screen
 
@@ -153,6 +165,7 @@ class ConfigScreen(BoxLayout):
         self.osc_port.text = app.osc_port
         self.osc_data_address.text = app.osc_data_address
         self.osc_go_address.text = app.osc_go_address
+        self.osc_syllable_address.text = app.osc_syllable_address
 
         app.screen_manager.current = app.previous_screen
 
@@ -239,7 +252,7 @@ class SyllableEntryBox(BoxLayout):
     def __init__(self, **kwargs):
         super(SyllableEntryBox, self).__init__(**kwargs)
 
-        self.textWidget = Label(text='', size_hint_x=14, font_size='30sp')
+        self.textWidget = Label(text='', size_hint_x=13, font_size='30sp')
         self.add_widget(self.textWidget)
         self.add_widget(Button(text='del', size_hint_x=1, on_release=self.delete))
 
@@ -259,7 +272,7 @@ class SyllableEntryBox(BoxLayout):
 ###############################################################
 
 
-def send_via_osc(poem):
+def play_poem_via_osc(poem):
     app = kivy.app.App.get_running_app()
 
     ip_address = app.osc_ip_address
@@ -279,6 +292,24 @@ def send_via_osc(poem):
     print msg
     print "\nto: ", ip_address, port, data_address 
     print "with go signal to: ", go_address
+
+
+def play_syllable_via_osc(syllable):
+    app = kivy.app.App.get_running_app()
+
+    ip_address = app.osc_ip_address
+    port = int(app.osc_port)
+    osc_address = app.osc_syllable_address
+
+    msg = ponumi_osc.syllables_to_kyma_osc([syllable])
+
+    #send poem array
+    oscAPI.sendMsg(osc_address, dataArray=msg, ipAddr=ip_address, port=port, typehint=None)
+
+
+    print "\nsent:" 
+    print msg
+    print "\nto: ", ip_address, port, osc_address 
 
 
 
@@ -309,6 +340,7 @@ class PonumiPerformer(App):
     osc_port = StringProperty(_default_osc_port)
     osc_data_address = StringProperty(_default_osc_data_address)
     osc_go_address = StringProperty(_default_osc_go_address)
+    osc_syllable_address = StringProperty(_default_osc_syllable_address)
 
     previous_screen = StringProperty(None)
 

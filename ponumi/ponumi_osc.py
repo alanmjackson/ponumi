@@ -8,20 +8,28 @@ _osc_scaling = len(syllable_list) * 1.0
 
 
 
+def syllables_to_kyma_osc(syllables):
+    """
+    Converts a list of syllables into a list of values suitable for sending to kyma / pacarana
+    over OSC.
+    """
+    notelist = poem_list_to_notes(syllables)
+    return notelist_to_kyma_osc(notelist)
+
+
 def poem_to_kyma_osc(poem):
     """
     Converts a poem into a list of values suitable for sending to kyma / pacarana
     over OSC.
     """
-    notelist = poem_list_to_notes(poem.syllables)
-    return notelist_to_kyma_osc(notelist)
+    return syllables_to_kyma_osc(poem.syllables)
 
 
 def notelist_to_kyma_osc(notelist):
     """
     Creates a list of values suitable for sending to kyma / pacarana
-    over OSC. All values need to be scaled between 0 and 1, which is done
-    by dividing all note numbers by 1000. 
+    over OSC. All values are scaled by _osc_scaling, usually so the 
+    result is between 0 and 1.
     """
     osc = []
 

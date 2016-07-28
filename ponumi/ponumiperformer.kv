@@ -6,6 +6,7 @@
 	osc_port: osc_port
 	osc_data_address: osc_data_address
 	osc_go_address: osc_go_address
+	osc_syllable_address: osc_syllable_address
 
 	orientation: 'vertical'
 	GridLayout:
@@ -43,6 +44,14 @@
 			id: osc_go_address
 			text: app.osc_go_address
 			multiline: False
+
+		Label:
+			text: 'osc syllable address'
+		TextInput:
+			id: osc_syllable_address
+			text: app.osc_syllable_address
+			multiline: False
+
 
 	BoxLayout:
 		orientation: 'horizontal'
