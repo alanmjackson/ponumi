@@ -200,26 +200,36 @@ class SyllableKey(Button):
     value = StringProperty()
 
 
-class SyllableKeyboard(GridLayout):
+class SyllableKeyboard(BoxLayout):
 
     def __init__(self, **kwargs):
         super(SyllableKeyboard, self).__init__(**kwargs)
 
         key_handler = kwargs['key_handler']
+        
+        self.spacing = 40
 
-        i = 0
-        for syllable in ponumi.syllable_list:
-            btn = SyllableKey(text=syllable, value=syllable)
-            btn.bind(on_release=key_handler)
-            self.add_widget(btn)
+        columns = 3
+        keys_per_row = 5
 
-            if i == 4 or i == 9:
-                self.add_widget(Label(text=''))                
-            i += 1
+        q, r = divmod(len(ponumi.syllable_list), keys_per_row)
+        total_rows = q + (r > 0)
 
-            if i == 15:
-                i = 0
+        q, r = divmod(total_rows, columns)
+        rows_per_column = q + (r > 0)
 
+        for col in range(columns):
+            col_layout = GridLayout(cols=keys_per_row)
+            for i in range(rows_per_column):
+                for j in range(keys_per_row):
+                    index = (col * rows_per_column * keys_per_row) + (i * keys_per_row) + j
+                    if index < len(ponumi.syllable_list):
+                        syllable = ponumi.syllable_list[index]
+                        btn = SyllableKey(text=syllable, value=syllable)
+                        btn.bind(on_release=key_handler)
+                        col_layout.add_widget(btn)
+
+            self.add_widget(col_layout)
 
 
 
