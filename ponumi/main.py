@@ -29,7 +29,7 @@ _ancestor = ['po', 'nu', 'mi', 'a', 'mu', 'nu', 'ma', 'ki']
 #touchosc discovered 169.254.9.91
 
 _default_osc_ip_address = '169.254.9.91'
-_default_osc_port = '55388'
+_default_osc_port = '8000'
 _default_osc_data_address = '/notelist' 
 _default_osc_go_address = '/go'
 _default_osc_syllable_address = '/syllable'
