@@ -13,7 +13,7 @@ from kivy.uix.textinput import TextInput
 from kivy.properties import StringProperty
 from kivy.properties import ListProperty
 from kivy.properties import ObjectProperty
-
+from kivy.clock import Clock
 
 import kivy.lib.osc.oscAPI as oscAPI
 
@@ -33,6 +33,9 @@ _default_osc_port = '8000'
 _default_osc_data_address = '/notelist' 
 _default_osc_go_address = '/go'
 _default_osc_syllable_address = '/syllable'
+
+_osc_go_delay = 0.01     #seconds
+
 
 #Screens
 
@@ -278,20 +281,29 @@ def play_poem_via_osc(poem):
     ip_address = app.osc_ip_address
     port = int(app.osc_port)
     data_address = app.osc_data_address
-    go_address = app.osc_go_address
 
     msg = ponumi_osc.poem_to_kyma_osc(poem)
 
     #send poem array
     oscAPI.sendMsg(data_address, dataArray=msg, ipAddr=ip_address, port=port, typehint=None)
 
+    print("\nsent:")
+    print(msg)
+    print "\nto: ", ip_address, port, data_address
+
+    Clock.schedule_once(send_osc_go_signal, _osc_go_delay)
+
+
+def send_osc_go_signal(*args):
+    app = kivy.app.App.get_running_app()
+
+    ip_address = app.osc_ip_address
+    port = int(app.osc_port)    
+    go_address = app.osc_go_address
+
     #send the go gate signal
     oscAPI.sendMsg(go_address, dataArray=[1.0], ipAddr=ip_address, port=port, typehint=None)
-
-    print "\nsent:" 
-    print msg
-    print "\nto: ", ip_address, port, data_address 
-    print "with go signal to: ", go_address
+    print "sent go signal to: ", ip_address, port, go_address
 
 
 def play_syllable_via_osc(syllable):
@@ -303,13 +315,13 @@ def play_syllable_via_osc(syllable):
 
     msg = ponumi_osc.syllables_to_kyma_osc([syllable])
 
-    #send poem array
+    #send syllables
     oscAPI.sendMsg(osc_address, dataArray=msg, ipAddr=ip_address, port=port, typehint=None)
 
 
-    print "\nsent:" 
-    print msg
-    print "\nto: ", ip_address, port, osc_address 
+    print("\nsent:")
+    print(msg)
+    print "\nto: ", ip_address, port, osc_address
 
 
 
