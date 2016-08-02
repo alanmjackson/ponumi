@@ -369,4 +369,14 @@ class PonumiPerformer(App):
 
 
 if __name__ == '__main__':
+    # Temporary tweaking of ponumi syllables to compensate for a couple of anomalies 
+    # in the index order of the Steph101.wav file
+    import copy
+    syllable_list = copy.copy(ponumi.syllable_list)
+    syllable_list.remove('zu')
+    syllable_list.remove('n')
+    syllable_list.insert(9, 'zu')
+    syllable_list.insert(10, 'n')
+    ponumi.syllables = dict( zip(syllable_list, range(1, len(syllable_list)+1) ) )
+
     PonumiPerformer().run()

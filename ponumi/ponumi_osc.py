@@ -4,7 +4,9 @@ from ponumi import poem_list_to_notes
 from ponumi import flatten
 from ponumi import syllable_list
 
-_osc_scaling = len(syllable_list) * 1.0
+#Add one to the length of syllable list to account for the list in kyma having a place holder 
+#for the zero position as the sample player index is 1-based.
+_osc_scaling = (len(syllable_list) + 1) * 1.0
 
 
 
