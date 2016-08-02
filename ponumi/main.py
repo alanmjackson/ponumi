@@ -14,8 +14,10 @@ from kivy.properties import StringProperty
 from kivy.properties import ListProperty
 from kivy.properties import ObjectProperty
 from kivy.clock import Clock
+from kivy.storage.jsonstore import JsonStore
 
 import kivy.lib.osc.oscAPI as oscAPI
+
 
 import pickle
 
@@ -23,8 +25,6 @@ import ponumi
 import ponumi_osc
 
 #Config:
-config_file = "ponumiperformer.cfg"
-
 _default_osc_ip_address = '169.254.9.91'
 _default_osc_port = '8000'
 _default_osc_data_address = '/notelist' 
@@ -33,8 +33,9 @@ _default_osc_syllable_address = '/syllable'
 
 _osc_go_delay = 0.01     #seconds
 
-
 _ancestor = ['po', 'nu', 'mi', 'a', 'mu', 'nu', 'ma', 'ki']
+
+config_store = JsonStore('ponumiperformer.json')
 
 #mac 169.254.211.66
 #kyma 169.254.157.100
@@ -59,7 +60,7 @@ class NameInputScreen(BoxLayout):
         screen_nav.add_widget(Button(
             text='config',
             size_hint_x=None,
-            size_x='20dp',
+            size_x='80dp',
             on_release=self.config_pressed))
 
         self.add_widget(screen_nav)
@@ -380,34 +381,22 @@ class PonumiPerformer(App):
 
     def save_config(self):
 
-        config = {}
-        config['osc_ip_address'] = self.osc_ip_address
-        config['osc_port'] = self.osc_port    
-        config['osc_data_address'] = self.osc_data_address
-        config['osc_go_address'] = self.osc_go_address
-
-        try:
-            f = open(config_file, 'wb')
-            pickle.dump(config, f)
-            f.close()
-        except Exception as e:
-            print("Can't save config.")
-            raise e
+        config_store.put('config', 
+            osc_ip_address=self.osc_ip_address,
+            osc_port=self.osc_port,
+            osc_data_address=self.osc_data_address,
+            osc_go_address=self.osc_go_address)
 
 
     def load_config(self):
 
-        try:
-            f = open(config_file, 'rb')
-            config = pickle.load(f)
-            f.close()
+        if config_store.exists('config'):
+            config = config_store.get('config')
 
             self.osc_ip_address = config['osc_ip_address']
             self.osc_port = config['osc_port']
             self.osc_data_address = config['osc_data_address']
             self.osc_go_address = config['osc_go_address']
-        except:
-            print("Can't load config.")
 
 
     def load_default_config(self):
