@@ -18,8 +18,7 @@ from kivy.storage.jsonstore import JsonStore
 
 import kivy.lib.osc.oscAPI as oscAPI
 
-
-import pickle
+from os.path import join
 
 import ponumi
 import ponumi_osc
@@ -34,8 +33,6 @@ _default_osc_syllable_address = '/syllable'
 _osc_go_delay = 0.01     #seconds
 
 _ancestor = ['po', 'nu', 'mi', 'a', 'mu', 'nu', 'ma', 'ki']
-
-config_store = JsonStore('ponumiperformer.json')
 
 #mac 169.254.211.66
 #kyma 169.254.157.100
@@ -370,18 +367,21 @@ class PonumiPerformer(App):
 
     def __init__(self, **kwargs):
         super(PonumiPerformer, self).__init__(**kwargs)
+        data_dir = getattr(self, 'user_data_dir')
+        self.config_store = JsonStore(join(data_dir, 'ponumiperformer.json'))
         oscAPI.init()
-        self.load_config()
 
 
     def build(self):
+        self.load_config()
+
         self.screen_manager = PonumiPerformerScreenManager()
         return self.screen_manager
 
 
     def save_config(self):
 
-        config_store.put('config', 
+        self.config_store.put('config', 
             osc_ip_address=self.osc_ip_address,
             osc_port=self.osc_port,
             osc_data_address=self.osc_data_address,
@@ -390,8 +390,8 @@ class PonumiPerformer(App):
 
     def load_config(self):
 
-        if config_store.exists('config'):
-            config = config_store.get('config')
+        if self.config_store.exists('config'):
+            config = self.config_store.get('config')
 
             self.osc_ip_address = config['osc_ip_address']
             self.osc_port = config['osc_port']
