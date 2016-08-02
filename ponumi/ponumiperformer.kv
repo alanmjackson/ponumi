@@ -51,6 +51,13 @@
 			id: osc_syllable_address
 			text: app.osc_syllable_address
 			multiline: False
+		Label:
+		Label:
+		Label:
+		Button: 
+			size_hint_y: 0.2
+			text: 'reset'
+			on_release: app.load_default_config()
 
 
 	BoxLayout:
@@ -62,6 +69,6 @@
 			size_hint_y: 0.2
 			on_release: self.parent.parent.cancel_pressed()
 		Button:
-			text: 'ok'
+			text: 'save'
 			size_hint_y: 0.2
 			on_release: self.parent.parent.ok_pressed()		

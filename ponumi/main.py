@@ -17,16 +17,13 @@ from kivy.clock import Clock
 
 import kivy.lib.osc.oscAPI as oscAPI
 
+import pickle
 
 import ponumi
 import ponumi_osc
 
-_ancestor = ['po', 'nu', 'mi', 'a', 'mu', 'nu', 'ma', 'ki']
-
-#mac 169.254.211.66
-#kyma 169.254.157.100
-#ipad 169.254.163.159
-#touchosc discovered 169.254.9.91
+#Config:
+config_file = "ponumiperformer.cfg"
 
 _default_osc_ip_address = '169.254.9.91'
 _default_osc_port = '8000'
@@ -35,6 +32,15 @@ _default_osc_go_address = '/go'
 _default_osc_syllable_address = '/syllable'
 
 _osc_go_delay = 0.01     #seconds
+
+
+_ancestor = ['po', 'nu', 'mi', 'a', 'mu', 'nu', 'ma', 'ki']
+
+#mac 169.254.211.66
+#kyma 169.254.157.100
+#ipad 169.254.163.159
+#touchosc discovered 169.254.9.91
+
 
 
 #Screens
@@ -160,6 +166,8 @@ class ConfigScreen(BoxLayout):
         app.osc_syllable_address = self.osc_syllable_address.text
 
         app.screen_manager.current = app.previous_screen
+        app.save_config()
+
 
     def cancel_pressed(self, *args):
         app = kivy.app.App.get_running_app()
@@ -325,6 +333,8 @@ def play_syllable_via_osc(syllable):
 
 
 
+
+
 ###############################################################
 # Top Level Widgets
 ###############################################################
@@ -356,9 +366,11 @@ class PonumiPerformer(App):
 
     previous_screen = StringProperty(None)
 
+
     def __init__(self, **kwargs):
         super(PonumiPerformer, self).__init__(**kwargs)
         oscAPI.init()
+        self.load_config()
 
 
     def build(self):
@@ -366,11 +378,53 @@ class PonumiPerformer(App):
         return self.screen_manager
 
 
+    def save_config(self):
+
+        config = {}
+        config['osc_ip_address'] = self.osc_ip_address
+        config['osc_port'] = self.osc_port    
+        config['osc_data_address'] = self.osc_data_address
+        config['osc_go_address'] = self.osc_go_address
+
+        try:
+            f = open(config_file, 'wb')
+            pickle.dump(config, f)
+            f.close()
+        except Exception as e:
+            print("Can't save config.")
+            raise e
+
+
+    def load_config(self):
+
+        try:
+            f = open(config_file, 'rb')
+            config = pickle.load(f)
+            f.close()
+
+            self.osc_ip_address = config['osc_ip_address']
+            self.osc_port = config['osc_port']
+            self.osc_data_address = config['osc_data_address']
+            self.osc_go_address = config['osc_go_address']
+        except:
+            print("Can't load config.")
+
+
+    def load_default_config(self):
+        self.osc_ip_address = _default_osc_ip_address
+        self.osc_port = _default_osc_port
+        self.osc_data_address = _default_osc_data_address
+        self.osc_go_address = _default_osc_go_address
+
+
+
 
 
 if __name__ == '__main__':
+
     # Temporary tweaking of ponumi syllables to compensate for a couple of anomalies 
-    # in the index order of the Steph101.wav file
+    # in the index order of the Steph101.wav file:
+    #START
     import copy
     syllable_list = copy.copy(ponumi.syllable_list)
     syllable_list.remove('zu')
@@ -378,5 +432,6 @@ if __name__ == '__main__':
     syllable_list.insert(9, 'zu')
     syllable_list.insert(10, 'n')
     ponumi.syllables = dict( zip(syllable_list, range(1, len(syllable_list)+1) ) )
+    #END
 
     PonumiPerformer().run()

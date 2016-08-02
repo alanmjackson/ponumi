@@ -96,3 +96,6 @@ ENV/
 
 # mac stuff
 .DS_Store
+
+# ponumi stuff
+ponumiperformer.cfg
