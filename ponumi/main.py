@@ -52,12 +52,12 @@ class NameInputScreen(BoxLayout):
         
         self.spacing = 10
 
-        screen_nav = BoxLayout(size_hint_y=0.07)
+        screen_nav = BoxLayout(size_hint_y=0.08)
 
         screen_nav.add_widget(Button(
-            text='config',
             size_hint_x=None,
-            size_x='80dp',
+            size=['100dp', 1],
+            text='cfg',
             on_release=self.config_pressed))
 
         self.add_widget(screen_nav)
