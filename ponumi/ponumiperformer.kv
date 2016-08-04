@@ -7,15 +7,14 @@
 	osc_data_address: osc_data_address
 	osc_go_address: osc_go_address
 	osc_syllable_address: osc_syllable_address
+	osc_syllable_gate_address: osc_syllable_gate_address
+
 
 	orientation: 'vertical'
-	GridLayout:
-		cols: 2
-		padding: '20dp'
-		spacing: '0dp', '20dp'
 
 	GridLayout:
 		cols: 2
+		padding: '40dp'
 		
 		Label:
 			text: 'ip address'
@@ -52,6 +51,12 @@
 			text: app.osc_syllable_address
 			multiline: False
 		Label:
+			text: 'osc syllable gate address'
+		TextInput:
+			id: osc_syllable_gate_address
+			text: app.osc_syllable_gate_address
+			multiline: False
+		Label:
 		Label:
 		Label:
 		Button: 
@@ -61,6 +66,7 @@
 
 
 	BoxLayout:
+		size_hint_y: 0.5
 		orientation: 'horizontal'
 		padding: '50dp', '0'
 		spacing: '100dp'

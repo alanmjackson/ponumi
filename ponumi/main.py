@@ -29,6 +29,7 @@ _default_osc_port = '8000'
 _default_osc_data_address = '/notelist' 
 _default_osc_go_address = '/go'
 _default_osc_syllable_address = '/syllable'
+_default_osc_syllable_gate_address = '/syllablegate'
 
 _osc_go_delay = 0.01     #seconds
 
@@ -98,7 +99,10 @@ class NameInputScreen(BoxLayout):
 
         self.add_widget(poem_controls)
 
-        self.add_widget(SyllableKeyboard(size_hint_y=0.7, key_handler=self.syllable_btn_pressed))
+        self.add_widget(SyllableKeyboard(
+            size_hint_y=0.7, 
+            key_release_handler=self.syllable_btn_released,
+            key_press_handler=self.syllable_btn_pressed))
 
 
     def generate_and_show_poem(self, root_name, ancestor):
@@ -107,11 +111,19 @@ class NameInputScreen(BoxLayout):
         self.poemTitle.text = ' '.join(self.poem.root_name)
         
 
-    def syllable_btn_pressed(self, *args):
+    def syllable_btn_released(self, *args):
         key = args[0]
         self.syllableEntryBox.append_syllable(key.value)
         if self.hear_button.state == 'down':
+            send_osc_syllable_gate_off()
+
+
+    def syllable_btn_pressed(self, *args):
+        key = args[0]
+        if self.hear_button.state == 'down':
             play_syllable_via_osc(key.value)
+            Clock.schedule_once(send_osc_syllable_gate_on, _osc_go_delay)
+
 
     def enter_pressed(self, *args):
         global _ancestor
@@ -152,6 +164,7 @@ class ConfigScreen(BoxLayout):
     osc_data_address = ObjectProperty(None)
     osc_go_address = ObjectProperty(None)
     osc_syllable_address = ObjectProperty(None)
+    osc_syllable_gate_address = ObjectProperty(None)
 
 
     def ok_pressed(self, *args):
@@ -162,6 +175,7 @@ class ConfigScreen(BoxLayout):
         app.osc_data_address = self.osc_data_address.text
         app.osc_go_address = self.osc_go_address.text
         app.osc_syllable_address = self.osc_syllable_address.text
+        app.osc_syllable_gate_address = self.osc_syllable_gate_address.text
 
         app.screen_manager.current = app.previous_screen
         app.save_config()
@@ -175,6 +189,7 @@ class ConfigScreen(BoxLayout):
         self.osc_data_address.text = app.osc_data_address
         self.osc_go_address.text = app.osc_go_address
         self.osc_syllable_address.text = app.osc_syllable_address
+        self.osc_syllable_gate_address.text = app.osc_syllable_gate_address
 
         app.screen_manager.current = app.previous_screen
 
@@ -227,7 +242,8 @@ class SyllableKeyboard(BoxLayout):
     def __init__(self, **kwargs):
         super(SyllableKeyboard, self).__init__(**kwargs)
 
-        key_handler = kwargs['key_handler']
+        key_release_handler = kwargs['key_release_handler']
+        key_press_handler = kwargs['key_press_handler']
         
         self.spacing = 40
 
@@ -248,7 +264,7 @@ class SyllableKeyboard(BoxLayout):
                     if index < len(ponumi.syllable_list):
                         syllable = ponumi.syllable_list[index]
                         btn = SyllableKey(text=syllable, value=syllable)
-                        btn.bind(on_release=key_handler)
+                        btn.bind(on_release=key_release_handler, on_press=key_press_handler)
                         col_layout.add_widget(btn)
 
             self.add_widget(col_layout)
@@ -303,7 +319,7 @@ def play_poem_via_osc(poem):
 def send_osc_go_on_signal(*args):
     app = kivy.app.App.get_running_app()
 
-    #send the go gate signal
+    #send the go gate on signal (ie the rising edge of the gate signal)
     oscAPI.sendMsg(
         app.osc_go_address, 
         ipAddr=app.osc_ip_address, 
@@ -318,13 +334,39 @@ def send_osc_go_on_signal(*args):
 def send_osc_go_off_signal(*args):
     app = kivy.app.App.get_running_app()
 
-    #send the go gate signal
+    #send the go gate off signal (ie the falling edge of the gate signal)
     oscAPI.sendMsg(
         app.osc_go_address, 
         ipAddr=app.osc_ip_address, 
         port=int(app.osc_port), 
         typehint=None,
         dataArray=[0.0]) 
+
+
+def send_osc_syllable_gate_on(*args):
+    app = kivy.app.App.get_running_app()
+
+    oscAPI.sendMsg(
+        app.osc_syllable_gate_address, 
+        ipAddr=app.osc_ip_address, 
+        port=int(app.osc_port), 
+        typehint=None,
+        dataArray=[1.0]) 
+
+    print 'osc syllable gate on'
+
+
+def send_osc_syllable_gate_off(*args):
+    app = kivy.app.App.get_running_app()
+
+    oscAPI.sendMsg(
+        app.osc_syllable_gate_address, 
+        ipAddr=app.osc_ip_address, 
+        port=int(app.osc_port), 
+        typehint=None,
+        dataArray=[0.0]) 
+
+    print 'osc syllable gate off'
 
 
 
@@ -377,6 +419,7 @@ class PonumiPerformer(App):
     osc_data_address = StringProperty(_default_osc_data_address)
     osc_go_address = StringProperty(_default_osc_go_address)
     osc_syllable_address = StringProperty(_default_osc_syllable_address)
+    osc_syllable_gate_address = StringProperty(_default_osc_syllable_gate_address)
 
     previous_screen = StringProperty(None)
 
@@ -401,7 +444,9 @@ class PonumiPerformer(App):
             osc_ip_address=self.osc_ip_address,
             osc_port=self.osc_port,
             osc_data_address=self.osc_data_address,
-            osc_go_address=self.osc_go_address)
+            osc_go_address=self.osc_go_address,
+            osc_syllable_address=self.osc_syllable_address,
+            osc_syllable_gate_address=self.osc_syllable_gate_address)
 
 
     def load_config(self):
@@ -409,10 +454,12 @@ class PonumiPerformer(App):
         if self.config_store.exists('config'):
             config = self.config_store.get('config')
 
-            self.osc_ip_address = config['osc_ip_address']
-            self.osc_port = config['osc_port']
-            self.osc_data_address = config['osc_data_address']
-            self.osc_go_address = config['osc_go_address']
+            if 'osc_ip_address' in config: self.osc_ip_address = config['osc_ip_address']
+            if 'osc_port' in config: self.osc_port = config['osc_port']
+            if 'osc_data_address' in config: self.osc_data_address = config['osc_data_address']
+            if 'osc_go_address' in config: self.osc_go_address = config['osc_go_address']
+            if 'osc_syllable_address' in config: self.osc_syllable_address = config['osc_syllable_address']
+            if 'osc_syllable_gate_address' in config: self.osc_syllable_gate_address = config['osc_syllable_gate_address']
 
 
     def load_default_config(self):
@@ -420,6 +467,8 @@ class PonumiPerformer(App):
         self.osc_port = _default_osc_port
         self.osc_data_address = _default_osc_data_address
         self.osc_go_address = _default_osc_go_address
+        self.osc_syllable_address = _default_osc_syllable_address
+        self.osc_syllable_gate_address = _default_osc_syllable_gate_address
 
 
 
