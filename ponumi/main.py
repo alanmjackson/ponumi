@@ -299,6 +299,9 @@ def play_poem_via_osc(poem):
 
     Clock.schedule_once(send_osc_go_signal, _osc_go_delay)
 
+    print len(ponumi.syllables)
+    print ponumi.syllables
+    
 
 def send_osc_go_signal(*args):
     app = kivy.app.App.get_running_app()
@@ -420,7 +423,7 @@ if __name__ == '__main__':
     syllable_list.remove('n')
     syllable_list.insert(9, 'zu')
     syllable_list.insert(10, 'n')
-    ponumi.syllables = dict( zip(syllable_list, range(1, len(syllable_list)+1) ) )
+    ponumi.syllables = dict( zip(syllable_list, range(0, len(syllable_list) ) ) )
     #END
 
     PonumiPerformer().run()

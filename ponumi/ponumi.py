@@ -72,7 +72,7 @@ for row in syllable_table:
     syllable_list = syllable_list + row
 
 # the list of syllables with corresponding note numbers
-syllables = dict( zip(syllable_list, range(1, len(syllable_list)+1) ) )
+syllables = dict( zip(syllable_list, range(0, len(syllable_list)) ) )
 
 '''
 The constructed syllable list with note numbers.
