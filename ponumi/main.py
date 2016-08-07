@@ -24,6 +24,8 @@ import ponumi
 import ponumi_osc
 
 #Config:
+_DEBUG = False
+
 _default_osc_ip_address = '169.254.9.91'
 _default_osc_port = '8000'
 _default_osc_data_address = '/notelist' 
@@ -298,97 +300,78 @@ class SyllableEntryBox(BoxLayout):
 
 
 def play_poem_via_osc(poem):
-    app = kivy.app.App.get_running_app()
-
-    ip_address = app.osc_ip_address
-    port = int(app.osc_port)
-    data_address = app.osc_data_address
-
+    osc_data_address = kivy.app.App.get_running_app().osc_data_address
     msg = ponumi_osc.poem_to_kyma_osc(poem)
 
-    #send poem array
-    oscAPI.sendMsg(data_address, dataArray=msg, ipAddr=ip_address, port=port, typehint=None)
+    send_osc_message(osc_data_address, msg)
 
-    print("\nsent:")
-    print(msg)
-    print "\nto: ", ip_address, port, data_address
-
+    #queue up the gate signal
     Clock.schedule_once(send_osc_go_on_signal, _osc_go_delay)
 
 
 def send_osc_go_on_signal(*args):
-    app = kivy.app.App.get_running_app()
+    osc_go_address = kivy.app.App.get_running_app().osc_go_address
 
-    #send the go gate on signal (ie the rising edge of the gate signal)
-    oscAPI.sendMsg(
-        app.osc_go_address, 
-        ipAddr=app.osc_ip_address, 
-        port=int(app.osc_port), 
-        typehint=None,
-        dataArray=[1.0]) 
-    
-    print "sent go signal to: ", app.osc_ip_address, app.osc_port, app.osc_go_address
+    #send the gate on signal (ie the rising edge of the gate signal)
+    send_osc_message(osc_go_address, [1.0])
+    #queue up the gate off signal (ie the falling edge)
     Clock.schedule_once(send_osc_go_off_signal, _osc_go_delay)
 
-
 def send_osc_go_off_signal(*args):
-    app = kivy.app.App.get_running_app()
+    osc_go_address = kivy.app.App.get_running_app().osc_go_address
 
-    #send the go gate off signal (ie the falling edge of the gate signal)
-    oscAPI.sendMsg(
-        app.osc_go_address, 
-        ipAddr=app.osc_ip_address, 
-        port=int(app.osc_port), 
-        typehint=None,
-        dataArray=[0.0]) 
+    send_osc_message(osc_go_address, [0.0])
 
 
 def send_osc_syllable_gate_on(*args):
-    app = kivy.app.App.get_running_app()
+    osc_syllable_gate_address = kivy.app.App.get_running_app().osc_syllable_gate_address
 
-    oscAPI.sendMsg(
-        app.osc_syllable_gate_address, 
-        ipAddr=app.osc_ip_address, 
-        port=int(app.osc_port), 
-        typehint=None,
-        dataArray=[1.0]) 
-
-    print 'osc syllable gate on'
-
+    send_osc_message(osc_syllable_gate_address, [1.0])
 
 def send_osc_syllable_gate_off(*args):
-    app = kivy.app.App.get_running_app()
+    osc.osc_syllable_gate_address = kivy.app.App.get_running_app().osc_syllable_gate_address
 
-    oscAPI.sendMsg(
-        app.osc_syllable_gate_address, 
-        ipAddr=app.osc_ip_address, 
-        port=int(app.osc_port), 
-        typehint=None,
-        dataArray=[0.0]) 
-
-    print 'osc syllable gate off'
+    send_osc_message(osc_syllable_gate_address, [0.0])
 
 
 
 def play_syllable_via_osc(syllable):
-    app = kivy.app.App.get_running_app()
-
-    ip_address = app.osc_ip_address
-    port = int(app.osc_port)
-    osc_address = app.osc_syllable_address
-
+    osc_syllable_address = kivy.app.App.get_running_app().osc_syllable_address
     msg = ponumi_osc.syllables_to_kyma_osc([syllable])
 
-    #send syllables
-    oscAPI.sendMsg(osc_address, dataArray=msg, ipAddr=ip_address, port=port, typehint=None)
+    send_osc_message(osc_syllable_address, msg)
 
 
-    print("\nsent:")
-    print(msg)
-    print "\nto: ", ip_address, port, osc_address
+def send_osc_message(osc_address, msg):
 
+    app = kivy.app.App.get_running_app()
+    ip_address = app.osc_ip_address
+    port = int(app.osc_port)
 
+    try:
+        oscAPI.sendMsg(
+            osc_address, 
+            dataArray=msg, 
+            ipAddr=ip_address, 
+            port=port, 
+            typehint=None)
 
+        print "\nsent:"
+        print msg
+        print "\nto: ", ip_address, port, osc_address
+
+    except Exception as e:
+        print "Problem sending OSC message"
+        print e
+
+        #The oscAPI creates a threading lock when sending an OSC message.
+        #If there is an exception this lock isn't released and the application will hang
+        #the next time an OSC message is sent because oscAPI will attempt to acquire a lock
+        #and threading.Lock() will block. 
+        oscAPI.oscLock.release()
+
+        if _DEBUG:
+            raise(e)
 
 
 ###############################################################
