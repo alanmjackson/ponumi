@@ -10,6 +10,9 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.textinput import TextInput
+from kivy.uix.actionbar import ActionBar
+from kivy.uix.actionbar import ActionButton
+
 from kivy.properties import StringProperty
 from kivy.properties import ListProperty
 from kivy.properties import ObjectProperty
@@ -19,6 +22,7 @@ from kivy.storage.jsonstore import JsonStore
 import kivy.lib.osc.oscAPI as oscAPI
 
 from os.path import join
+from functools import partial
 
 import ponumi
 import ponumi_osc
@@ -55,15 +59,10 @@ class NameInputScreen(BoxLayout):
         
         self.spacing = 10
 
-        screen_nav = BoxLayout(size_hint_y=0.08)
+        navbar = NavBar(id='navbar')
 
-        screen_nav.add_widget(Button(
-            size_hint_x=None,
-            size=['100dp', 1],
-            text='cfg',
-            on_release=self.config_pressed))
+        self.add_widget(navbar)
 
-        self.add_widget(screen_nav)
 
         titleLayout = BoxLayout(size_hint_y=0.05)
 
@@ -151,11 +150,6 @@ class NameInputScreen(BoxLayout):
         if self.poem:
             osc_data = play_poem_via_osc(self.poem)
         
-    def config_pressed(self, *args):
-        app = kivy.app.App.get_running_app()
-        
-        app.previous_screen = app.screen_manager.current
-        app.screen_manager.current = 'config_screen'
 
 
 
@@ -202,6 +196,24 @@ class ConfigScreen(BoxLayout):
 # Parts of screens
 ###############################################################
 
+class NavBar(ActionBar):
+
+    osc_indicator = ObjectProperty(None)
+
+    def __init__(self, **kwargs):
+        super(NavBar, self).__init__(**kwargs)
+
+        kivy.app.App.get_running_app().osc_indicator = self.osc_indicator
+
+
+    def config_pressed(self, *args):
+        app = kivy.app.App.get_running_app()
+        
+        app.previous_screen = app.screen_manager.current
+        app.screen_manager.current = 'config_screen'
+
+
+
 
 class PoemDisplay(GridLayout):
 
@@ -237,6 +249,14 @@ class PoemDisplay(GridLayout):
 
 class SyllableKey(Button):
     value = StringProperty()
+
+    def __init__(self, **kwargs):
+        super(SyllableKey, self).__init__(**kwargs)
+
+        self.background_color = (255,255,255,1.0)
+        self.color = (0,0,0,1.0)
+        self.bold = True
+        #self.background_normal = 'images/button_texture.png'
 
 
 class SyllableKeyboard(BoxLayout):
@@ -342,6 +362,24 @@ def play_syllable_via_osc(syllable):
     send_osc_message(osc_syllable_address, msg)
 
 
+def set_osc_indicator(state, *largs):
+    app = kivy.app.App.get_running_app()
+
+
+    if state == 3:
+        path = 'images/audio-volume-high.png'
+    elif state == 2:
+        path = 'images/audio-volume-medium.png'
+    elif state == 1:
+        path = 'images/audio-volume-low.png'
+    elif state == -1:
+        path = 'images/audio-volume-muted.png'
+    else:
+        path = 'images/audio-volume-none-inv2.png'
+
+    app.osc_indicator.icon = path
+
+
 def send_osc_message(osc_address, msg):
 
     app = kivy.app.App.get_running_app()
@@ -360,6 +398,14 @@ def send_osc_message(osc_address, msg):
         print msg
         print "\nto: ", ip_address, port, osc_address
 
+        for i in range(3):
+            Clock.schedule_once(partial(set_osc_indicator, 1), i + 0.25)
+            Clock.schedule_once(partial(set_osc_indicator, 2), i + 0.5)
+            Clock.schedule_once(partial(set_osc_indicator, 3), i + 0.75)
+            Clock.schedule_once(partial(set_osc_indicator, 0), i + 1.0)
+
+
+
     except Exception as e:
         print "Problem sending OSC message"
         print e
@@ -369,6 +415,10 @@ def send_osc_message(osc_address, msg):
         #the next time an OSC message is sent because oscAPI will attempt to acquire a lock
         #and threading.Lock() will block. 
         oscAPI.oscLock.release()
+
+        for i in range(3):
+            Clock.schedule_once(partial(set_osc_indicator, -1), i * 2)
+            Clock.schedule_once(partial(set_osc_indicator, 0), (i * 2) + 1.0)
 
         if _DEBUG:
             raise(e)
@@ -385,7 +435,7 @@ class PonumiPerformerScreenManager(ScreenManager):
         super(PonumiPerformerScreenManager, self).__init__(**kwargs)
         
         entry_screen = Screen(name='entry_screen')
-        entry_screen.add_widget(NameInputScreen(orientation='vertical'))
+        entry_screen.add_widget(NameInputScreen(orientation='vertical', id='nameinput'))
 
         config_screen = Screen(name='config_screen')
         config_screen.add_widget(ConfigScreen())
@@ -405,6 +455,8 @@ class PonumiPerformer(App):
     osc_syllable_gate_address = StringProperty(_default_osc_syllable_gate_address)
 
     previous_screen = StringProperty(None)
+
+    osc_indicator = ObjectProperty(None)
 
 
     def __init__(self, **kwargs):

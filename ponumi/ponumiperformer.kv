@@ -1,3 +1,25 @@
+<NavBar>:
+	background_color: 0,0,0,1
+	osc_indicator: osc_indicator
+
+    pos_hint: {'top':1}
+    ActionView:
+        use_separator: True
+        ActionPrevious:
+            with_previous: False
+            app_icon: 'images/logo.png'
+
+        ActionButton:
+            background_normal: 'images/config-inv2.png'
+            background_down: 'images/config.png'
+            on_release: root.config_pressed()
+
+
+        ActionButton:
+        	id: osc_indicator
+            text: 'Btn0'
+            icon: 'images/audio-volume-none-inv2.png'
+
 <SyllableKeyboard>:
     cols: 17
 
