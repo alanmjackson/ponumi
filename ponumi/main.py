@@ -50,6 +50,16 @@ _ancestor = ['po', 'nu', 'mi', 'a', 'mu', 'nu', 'ma', 'ki']
 
 #Screens
 
+
+class RootScreen(BoxLayout):
+
+    def __init__(self, **kwargs):
+        super(RootScreen, self).__init__(**kwargs)
+
+        self.orientation = 'vertical'
+
+
+
 class NameInputScreen(BoxLayout):
 
     def __init__(self, **kwargs):
@@ -57,12 +67,8 @@ class NameInputScreen(BoxLayout):
 
         self.poem = None
         
+        self.orientation = 'vertical'
         self.spacing = 10
-
-        navbar = NavBar(id='navbar')
-
-        self.add_widget(navbar)
-
 
         titleLayout = BoxLayout(size_hint_y=0.05)
 
@@ -76,24 +82,30 @@ class NameInputScreen(BoxLayout):
         self.add_widget(self.poemDisplay)
 
 
-        poem_controls = BoxLayout(size_hint_y=0.1)
+        poem_controls = BoxLayout(size_hint_y=0.1, spacing=15)
 
         self.syllableEntryBox = SyllableEntryBox(size_hint_x=14)
         poem_controls.add_widget(self.syllableEntryBox)
 
         poem_controls.add_widget(Button(
-            text='enter',
-            size_hint_x=1,
+            #text='enter',
+            size_hint=[None, None],
+            size=[48, 48],
+            background_normal='images/ret-no-alpha.png',
             on_release=self.enter_pressed))
 
         poem_controls.add_widget(Button(
-            text='play',
-            size_hint_x=1, 
+            #text='play',
+            size_hint=[None, None],
+            size=[48, 48],
+            background_normal='images/play-no-alpha.png', 
             on_release=self.play_pressed))
 
         self.hear_button = ToggleButton(
-            text='hear',
-            size_hint_x=1)
+            #text='hear',
+            size_hint=[None, None],
+            size=[48, 48],
+            background_normal='images/hear-no-alpha.png')
 
         poem_controls.add_widget(self.hear_button)
 
@@ -148,7 +160,7 @@ class NameInputScreen(BoxLayout):
 
     def play_pressed(self, *args):
         if self.poem:
-            osc_data = play_poem_via_osc(self.poem)
+            play_poem_via_osc(self.poem)
         
 
 
@@ -162,8 +174,11 @@ class ConfigScreen(BoxLayout):
     osc_syllable_address = ObjectProperty(None)
     osc_syllable_gate_address = ObjectProperty(None)
 
+    def __init__(self, **kwargs):
+        super(ConfigScreen, self).__init__(**kwargs)
 
-    def ok_pressed(self, *args):
+
+    def save_pressed(self, *args):
         app = kivy.app.App.get_running_app()
 
         app.osc_ip_address = self.osc_ip_address.text
@@ -173,21 +188,8 @@ class ConfigScreen(BoxLayout):
         app.osc_syllable_address = self.osc_syllable_address.text
         app.osc_syllable_gate_address = self.osc_syllable_gate_address.text
 
-        app.screen_manager.current = app.previous_screen
         app.save_config()
 
-
-    def cancel_pressed(self, *args):
-        app = kivy.app.App.get_running_app()
-
-        self.osc_ip_address.text = app.osc_ip_address
-        self.osc_port.text = app.osc_port
-        self.osc_data_address.text = app.osc_data_address
-        self.osc_go_address.text = app.osc_go_address
-        self.osc_syllable_address.text = app.osc_syllable_address
-        self.osc_syllable_gate_address.text = app.osc_syllable_gate_address
-
-        app.screen_manager.current = app.previous_screen
 
 
 
@@ -203,14 +205,11 @@ class NavBar(ActionBar):
     def __init__(self, **kwargs):
         super(NavBar, self).__init__(**kwargs)
 
-        kivy.app.App.get_running_app().osc_indicator = self.osc_indicator
-
+    def entry_pressed(self, *args):
+        kivy.app.App.get_running_app().screen_manager.current = 'entry_screen'
 
     def config_pressed(self, *args):
-        app = kivy.app.App.get_running_app()
-        
-        app.previous_screen = app.screen_manager.current
-        app.screen_manager.current = 'config_screen'
+        kivy.app.App.get_running_app().screen_manager.current = 'config_screen'
 
 
 
@@ -301,7 +300,14 @@ class SyllableEntryBox(BoxLayout):
 
         self.textWidget = Label(text='', size_hint_x=13, font_size='30sp')
         self.add_widget(self.textWidget)
-        self.add_widget(Button(text='del', size_hint_x=1, on_release=self.delete))
+        self.add_widget(Button(
+            #text='del', 
+            size_hint_x=None,
+            size_hint_y=None,
+            size=[48, 48],
+            background_color=[127,127,127,1.0],
+            background_normal='images/del-no-alpha.png', 
+            on_release=self.delete))
 
     def on_syllables(self, instance, value):
         self.textWidget.text = ' '.join(self.syllables)
@@ -349,7 +355,7 @@ def send_osc_syllable_gate_on(*args):
     send_osc_message(osc_syllable_gate_address, [1.0])
 
 def send_osc_syllable_gate_off(*args):
-    osc.osc_syllable_gate_address = kivy.app.App.get_running_app().osc_syllable_gate_address
+    osc_syllable_gate_address = kivy.app.App.get_running_app().osc_syllable_gate_address
 
     send_osc_message(osc_syllable_gate_address, [0.0])
 
@@ -375,8 +381,9 @@ def set_osc_indicator(state, *largs):
     elif state == -1:
         path = 'images/audio-volume-muted.png'
     else:
-        path = 'images/audio-volume-none-inv2.png'
+        path = 'images/audio-volume-none-glitch-inv.png'
 
+    print app.osc_indicator
     app.osc_indicator.icon = path
 
 
@@ -398,7 +405,9 @@ def send_osc_message(osc_address, msg):
         print msg
         print "\nto: ", ip_address, port, osc_address
 
-        for i in range(3):
+        indicator_duration = min(5, max(1, int(len(msg) / 12)))
+
+        for i in range(indicator_duration):
             Clock.schedule_once(partial(set_osc_indicator, 1), i + 0.25)
             Clock.schedule_once(partial(set_osc_indicator, 2), i + 0.5)
             Clock.schedule_once(partial(set_osc_indicator, 3), i + 0.75)
@@ -416,9 +425,9 @@ def send_osc_message(osc_address, msg):
         #and threading.Lock() will block. 
         oscAPI.oscLock.release()
 
-        for i in range(3):
-            Clock.schedule_once(partial(set_osc_indicator, -1), i * 2)
-            Clock.schedule_once(partial(set_osc_indicator, 0), (i * 2) + 1.0)
+        for i in range(2):
+            Clock.schedule_once(partial(set_osc_indicator, -1), i)
+            Clock.schedule_once(partial(set_osc_indicator, 0), (i + 0.5))
 
         if _DEBUG:
             raise(e)
@@ -435,13 +444,14 @@ class PonumiPerformerScreenManager(ScreenManager):
         super(PonumiPerformerScreenManager, self).__init__(**kwargs)
         
         entry_screen = Screen(name='entry_screen')
-        entry_screen.add_widget(NameInputScreen(orientation='vertical', id='nameinput'))
+        entry_screen.add_widget(NameInputScreen())
 
         config_screen = Screen(name='config_screen')
         config_screen.add_widget(ConfigScreen())
 
         self.add_widget(entry_screen)
         self.add_widget(config_screen)
+
 
 
 
@@ -453,8 +463,6 @@ class PonumiPerformer(App):
     osc_go_address = StringProperty(_default_osc_go_address)
     osc_syllable_address = StringProperty(_default_osc_syllable_address)
     osc_syllable_gate_address = StringProperty(_default_osc_syllable_gate_address)
-
-    previous_screen = StringProperty(None)
 
     osc_indicator = ObjectProperty(None)
 
@@ -469,8 +477,15 @@ class PonumiPerformer(App):
     def build(self):
         self.load_config()
 
+        rootscreen = RootScreen()
+
+        navbar = NavBar()
+        self.osc_indicator = navbar.osc_indicator
+        rootscreen.add_widget(navbar)
         self.screen_manager = PonumiPerformerScreenManager()
-        return self.screen_manager
+        rootscreen.add_widget(self.screen_manager)
+
+        return rootscreen
 
 
     def save_config(self):

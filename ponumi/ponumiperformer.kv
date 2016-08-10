@@ -10,15 +10,34 @@
             app_icon: 'images/logo.png'
 
         ActionButton:
-            background_normal: 'images/config-inv2.png'
-            background_down: 'images/config.png'
+        	background_normal: 'images/poem-glitch-inv.png'
+        	background_down: 'images/poem-glitch.png'
+        	on_release: root.entry_pressed()
+
+        ActionButton:
+        	background_normal: 'images/manual-glitch-inv.png'
+        	background_down: 'images/manual-glitch.png'
+
+        ActionButton:
+        	background_normal: 'images/laser-glitch-inv.png'
+        	background_down: 'images/laser-glitch.png'
+
+        ActionButton:
+        	background_normal: 'images/rhythm-glitch-inv.png'
+        	background_down: 'images/rhythm-glitch.png'
+
+        ActionButton:
+            background_normal: 'images/config-glitch-inv.png'
+            background_down: 'images/config-glitch.png'
             on_release: root.config_pressed()
 
+        ActionSeparator:
 
         ActionButton:
         	id: osc_indicator
             text: 'Btn0'
-            icon: 'images/audio-volume-none-inv2.png'
+            icon: 'images/audio-volume-none-glitch-inv.png'
+        	padding_x: [200, 0]
 
 <SyllableKeyboard>:
     cols: 17
@@ -33,6 +52,7 @@
 
 
 	orientation: 'vertical'
+
 
 	GridLayout:
 		cols: 2
@@ -78,13 +98,6 @@
 			id: osc_syllable_gate_address
 			text: app.osc_syllable_gate_address
 			multiline: False
-		Label:
-		Label:
-		Label:
-		Button: 
-			size_hint_y: 0.2
-			text: 'reset'
-			on_release: app.load_default_config()
 
 
 	BoxLayout:
@@ -93,10 +106,10 @@
 		padding: '50dp', '0'
 		spacing: '100dp'
 		Button:
-			text: 'cancel'
+			text: 'reset'
 			size_hint_y: 0.2
-			on_release: self.parent.parent.cancel_pressed()
+			on_release: app.load_default_config()
 		Button:
 			text: 'save'
 			size_hint_y: 0.2
-			on_release: self.parent.parent.ok_pressed()		
+			on_release: self.parent.parent.save_pressed()		
