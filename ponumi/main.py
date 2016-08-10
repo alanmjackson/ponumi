@@ -177,10 +177,9 @@ class ConfigScreen(BoxLayout):
     def __init__(self, **kwargs):
         super(ConfigScreen, self).__init__(**kwargs)
 
+
     def refresh_form(self, *args):
         app = kivy.app.App.get_running_app()
-
-        print 'here!'
 
         self.osc_ip_address.text = app.osc_ip_address
         self.osc_port.text = app.osc_port
@@ -188,6 +187,7 @@ class ConfigScreen(BoxLayout):
         self.osc_go_address.text = app.osc_go_address
         self.osc_syllable_address.text = app.osc_syllable_address
         self.osc_syllable_gate_address.text = app.osc_syllable_gate_address
+
 
 
     def save_pressed(self, *args):
@@ -222,6 +222,11 @@ class NavBar(ActionBar):
 
     def config_pressed(self, *args):
         kivy.app.App.get_running_app().screen_manager.current = 'config_screen'
+
+        #This next line seems hacky, but I couldn't get this to work triggering from the
+        #on_enter event of the Screen. The function would get run but would have no
+        #effect on the text input widgets on the screen. 
+        kivy.app.App.get_running_app().screen_manager.current_screen.children[0].refresh_form()
 
 
 
@@ -458,7 +463,7 @@ class PonumiPerformerScreenManager(ScreenManager):
         entry_screen.add_widget(NameInputScreen())
 
         config_widget = ConfigScreen()
-        config_screen = Screen(name='config_screen', on_enter=config_widget.refresh_form)
+        config_screen = Screen(name='config_screen')
         config_screen.add_widget(ConfigScreen())
 
         self.add_widget(entry_screen)
