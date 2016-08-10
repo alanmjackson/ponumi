@@ -205,7 +205,97 @@ class ConfigScreen(BoxLayout):
 
 
 class ManualScreen(BoxLayout):
-    pass
+
+    syllables = ListProperty([])
+
+    def __init__(self, **kwargs):
+        super(ManualScreen, self).__init__(**kwargs)
+
+        self.orientation = 'vertical'
+        self.spacing=15
+
+        self.poem_display = PoemDisplay(size_hint_y=0.4)
+        self.add_widget(self.poem_display)
+
+        controls = BoxLayout(size_hint_y=0.1, spacing=15)
+
+        controls.add_widget(Label(size_hint_x=12))
+        controls.add_widget(Button(
+            #text='del',
+            size_hint=[None, None],
+            size=[48, 48],
+            background_normal='images/del-no-alpha.png',
+            on_release=self.del_pressed))
+
+        controls.add_widget(Button(
+            #text='clear',
+            size_hint=[None, None],
+            size=[48, 48],
+            background_normal='images/clear-no-alpha.png',
+            on_release=self.clear_pressed))
+
+        controls.add_widget(Button(
+            #text='play',
+            size_hint=[None, None],
+            size=[48, 48],
+            background_normal='images/play-no-alpha.png', 
+            on_release=self.play_pressed))
+
+        self.hear_button = ToggleButton(
+            #text='hear',
+            size_hint=[None, None],
+            size=[48, 48],
+            background_normal='images/hear-no-alpha.png')
+
+        controls.add_widget(self.hear_button)
+
+        self.add_widget(controls)
+
+
+        self.add_widget(SyllableKeyboard(
+            size_hint_y = 0.7,
+            on_syllable_down=self.syllable_btn_pressed,
+            on_syllable_up=self.syllable_btn_released))
+
+
+    def del_pressed(self, *args):
+        if len(self.syllables) > 0:
+            self.syllables.pop()
+
+
+    def clear_pressed(self, *args):
+        self.syllables = []
+
+
+    def play_pressed(self, *args):
+        poem = ponumi.Poem(self.syllables)
+        if poem:
+            play_poem_via_osc(poem)
+
+
+    def syllable_btn_pressed(self, *args):
+        key = args[1]
+        if self.hear_button.state == 'down':
+            play_syllable_via_osc(key.value)
+            Clock.schedule_once(send_osc_syllable_gate_on, _osc_go_delay)
+
+
+    def syllable_btn_released(self, *args):
+        key = args[1]
+        self.syllables.append(key.value)
+        if self.hear_button.state == 'down':
+            send_osc_syllable_gate_off()
+
+    def on_syllables(self, instance, value):
+        if len(self.syllables) > 48:
+            self.syllables = self.syllables[:48]
+
+        #PoemDisplay expects a 2D array
+        poem = [['' for x in range(12)] for y in range(4)]
+        for i in range(min(48, len(self.syllables))):
+            poem[int(i/12)][i % 12] = self.syllables[i]
+
+        self.poem_display.syllables = poem
 
 
 class KeyboardScreen(BoxLayout):
@@ -213,7 +303,7 @@ class KeyboardScreen(BoxLayout):
     def __init__(self, **kwargs):
         super(KeyboardScreen, self).__init__(**kwargs)
         self.add_widget(SyllableKeyboard(
-            size_hint_y = 0.8,
+            size_hint_y = 0.9,
             on_syllable_down=self.syllable_btn_pressed,
             on_syllable_up=self.syllable_btn_released))
 
@@ -294,10 +384,18 @@ class PoemDisplay(GridLayout):
 
 
     def on_syllables(self, instance, value):
+        #truncate array to 4 x 12
+        truncated_syllables = self.syllables[:4]
+        for k in range(len(truncated_syllables)):
+            truncated_syllables[k] = truncated_syllables[k][:12]
+        self.syllables = truncated_syllables
+
         for i in range(4):
             for j in range(12):
-                self.display_syllables[i][j].text = self.syllables[i][j]
-
+                if i < len(self.syllables) and j < len(self.syllables[i]):
+                    self.display_syllables[i][j].text = self.syllables[i][j]
+                else:
+                    self.display_syllables[i][j].text = ''
 
 
 
@@ -347,7 +445,6 @@ class SyllableKeyboard(BoxLayout):
             col_layout = GridLayout(cols=keys_per_row)
             for i in range(rows_per_column):
                 down_colour = down_colours[i]
-                print i, down_colour
                 for j in range(keys_per_row):
                     index = (col * rows_per_column * keys_per_row) + (i * keys_per_row) + j
                     if index < len(ponumi.syllable_list):
