@@ -114,8 +114,8 @@ class NameInputScreen(BoxLayout):
 
         self.add_widget(SyllableKeyboard(
             size_hint_y=0.7, 
-            key_release_handler=self.syllable_btn_released,
-            key_press_handler=self.syllable_btn_pressed))
+            on_syllable_down=self.syllable_btn_pressed,
+            on_syllable_up=self.syllable_btn_released))
 
 
     def generate_and_show_poem(self, root_name, ancestor):
@@ -124,18 +124,19 @@ class NameInputScreen(BoxLayout):
         self.poemTitle.text = ' '.join(self.poem.root_name)
         
 
+    def syllable_btn_pressed(self, *args):
+        key = args[1]
+        if self.hear_button.state == 'down':
+            play_syllable_via_osc(key.value)
+            Clock.schedule_once(send_osc_syllable_gate_on, _osc_go_delay)
+
     def syllable_btn_released(self, *args):
-        key = args[0]
+        key = args[1]
         self.syllableEntryBox.append_syllable(key.value)
         if self.hear_button.state == 'down':
             send_osc_syllable_gate_off()
 
 
-    def syllable_btn_pressed(self, *args):
-        key = args[0]
-        if self.hear_button.state == 'down':
-            play_syllable_via_osc(key.value)
-            Clock.schedule_once(send_osc_syllable_gate_on, _osc_go_delay)
 
 
     def enter_pressed(self, *args):
@@ -206,8 +207,24 @@ class ConfigScreen(BoxLayout):
 class ManualScreen(BoxLayout):
     pass
 
+
 class KeyboardScreen(BoxLayout):
-    pass
+
+    def __init__(self, **kwargs):
+        super(KeyboardScreen, self).__init__(**kwargs)
+        self.add_widget(SyllableKeyboard(
+            on_syllable_down=self.syllable_btn_pressed,
+            on_syllable_up=self.syllable_btn_released))
+
+
+    def syllable_btn_pressed(self, *args):
+        play_syllable_via_osc(args[1].value)
+        Clock.schedule_once(send_osc_syllable_gate_on, _osc_go_delay)
+
+    def syllable_btn_released(self, *args):
+        send_osc_syllable_gate_off()
+
+
 
 class RhythmScreen(BoxLayout):
     pass
@@ -299,11 +316,11 @@ class SyllableKey(Button):
 class SyllableKeyboard(BoxLayout):
 
     def __init__(self, **kwargs):
+        self.register_event_type('on_syllable_down')
+        self.register_event_type('on_syllable_up')
+
         super(SyllableKeyboard, self).__init__(**kwargs)
 
-        key_release_handler = kwargs['key_release_handler']
-        key_press_handler = kwargs['key_press_handler']
-        
         self.spacing = 40
 
         columns = 3
@@ -323,11 +340,24 @@ class SyllableKeyboard(BoxLayout):
                     if index < len(ponumi.syllable_list):
                         syllable = ponumi.syllable_list[index]
                         btn = SyllableKey(text=syllable, value=syllable)
-                        btn.bind(on_release=key_release_handler, on_press=key_press_handler)
+                        btn.bind(
+                            on_release=self.key_release_handler, 
+                            on_press=self.key_press_handler)
                         col_layout.add_widget(btn)
 
             self.add_widget(col_layout)
 
+    def key_press_handler(self, *args):
+        self.dispatch('on_syllable_down', args[0])
+
+    def key_release_handler(self, *args):
+        self.dispatch('on_syllable_up', args[0])
+
+    def on_syllable_down(self, *args):
+        pass
+
+    def on_syllable_up(self, *args):
+        pass
 
 
 class SyllableEntryBox(BoxLayout):
