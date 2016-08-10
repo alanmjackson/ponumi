@@ -203,7 +203,17 @@ class ConfigScreen(BoxLayout):
         app.save_config()
 
 
+class ManualScreen(BoxLayout):
+    pass
 
+class KeyboardScreen(BoxLayout):
+    pass
+
+class RhythmScreen(BoxLayout):
+    pass
+
+class VCSScreen(BoxLayout):
+    pass
 
 
 ###############################################################
@@ -220,6 +230,18 @@ class NavBar(ActionBar):
     def entry_pressed(self, *args):
         kivy.app.App.get_running_app().screen_manager.current = 'entry_screen'
 
+    def manual_pressed(self, *args):
+        kivy.app.App.get_running_app().screen_manager.current = 'manual_screen'
+
+    def keyboard_pressed(self, *args):
+        kivy.app.App.get_running_app().screen_manager.current = 'keyboard_screen'
+
+    def rhythm_pressed(self, *args):
+        kivy.app.App.get_running_app().screen_manager.current = 'rhythm_screen'
+
+    def vcs_pressed(self, *args):
+        kivy.app.App.get_running_app().screen_manager.current = 'vcs_screen'
+
     def config_pressed(self, *args):
         kivy.app.App.get_running_app().screen_manager.current = 'config_screen'
 
@@ -227,7 +249,6 @@ class NavBar(ActionBar):
         #on_enter event of the Screen. The function would get run but would have no
         #effect on the text input widgets on the screen. 
         kivy.app.App.get_running_app().screen_manager.current_screen.children[0].refresh_form()
-
 
 
 
@@ -462,11 +483,26 @@ class PonumiPerformerScreenManager(ScreenManager):
         entry_screen = Screen(name='entry_screen')
         entry_screen.add_widget(NameInputScreen())
 
-        config_widget = ConfigScreen()
+        manual_screen = Screen(name='manual_screen')
+        manual_screen.add_widget(ManualScreen())
+
+        keyboard_screen = Screen(name='keyboard_screen')
+        keyboard_screen.add_widget(KeyboardScreen())
+
+        rhythm_screen = Screen(name='rhythm_screen')
+        rhythm_screen.add_widget(RhythmScreen())
+
+        vcs_screen = Screen(name='vcs_screen')
+        vcs_screen.add_widget(VCSScreen())
+
         config_screen = Screen(name='config_screen')
         config_screen.add_widget(ConfigScreen())
 
         self.add_widget(entry_screen)
+        self.add_widget(manual_screen)
+        self.add_widget(keyboard_screen)
+        self.add_widget(rhythm_screen)
+        self.add_widget(vcs_screen)
         self.add_widget(config_screen)
 
 

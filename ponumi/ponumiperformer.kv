@@ -17,14 +17,22 @@
         ActionButton:
         	background_normal: 'images/manual-glitch-inv.png'
         	background_down: 'images/manual-glitch.png'
+        	on_release: root.keyboard_pressed()
 
         ActionButton:
         	background_normal: 'images/laser-glitch-inv.png'
         	background_down: 'images/laser-glitch.png'
+        	on_release: root.manual_pressed()
 
         ActionButton:
         	background_normal: 'images/rhythm-glitch-inv.png'
         	background_down: 'images/rhythm-glitch.png'
+        	on_release: root.rhythm_pressed()
+
+        ActionButton:
+        	background_normal: 'images/vcs-glitch-inv.png'
+        	background_down: 'images/vcs-glitch.png'
+        	on_release: root.vcs_pressed()
 
         ActionButton:
             background_normal: 'images/config-glitch-inv.png'
@@ -113,3 +121,19 @@
 			text: 'save'
 			size_hint_y: 0.2
 			on_release: self.parent.parent.save_pressed()		
+
+<ManualScreen>:
+	Label:
+		text: 'The Manual Screen'
+
+<KeyboardScreen>:
+	Label:
+		text: 'The Keyboard Screen'
+
+<RhythmScreen>:
+	Label:
+		text: 'The Rhythm Screen'
+
+<VCSScreen>:
+	Label:
+		text: 'The VCS Screen'
