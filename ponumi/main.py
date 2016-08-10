@@ -213,6 +213,7 @@ class KeyboardScreen(BoxLayout):
     def __init__(self, **kwargs):
         super(KeyboardScreen, self).__init__(**kwargs)
         self.add_widget(SyllableKeyboard(
+            size_hint_y = 0.8,
             on_syllable_down=self.syllable_btn_pressed,
             on_syllable_up=self.syllable_btn_released))
 
@@ -307,10 +308,10 @@ class SyllableKey(Button):
     def __init__(self, **kwargs):
         super(SyllableKey, self).__init__(**kwargs)
 
-        self.background_color = (255,255,255,1.0)
+        #self.background_color = (127,127,127,1.0)
         self.color = (0,0,0,1.0)
         self.bold = True
-        #self.background_normal = 'images/button_texture.png'
+        self.background_normal = 'images/button_texture_white.png'
 
 
 class SyllableKeyboard(BoxLayout):
@@ -332,18 +333,31 @@ class SyllableKeyboard(BoxLayout):
         q, r = divmod(total_rows, columns)
         rows_per_column = q + (r > 0)
 
+        down_colours = [
+            'images/button_pressed_red.png',
+            'images/button_pressed_orange.png',
+            'images/button_pressed_yellow.png',
+            'images/button_pressed_green.png',
+            'images/button_pressed_turquoise.png',
+            'images/button_pressed_purple.png',
+            'images/button_pressed_magenta.png'
+        ]
+
         for col in range(columns):
             col_layout = GridLayout(cols=keys_per_row)
             for i in range(rows_per_column):
+                down_colour = down_colours[i]
+                print i, down_colour
                 for j in range(keys_per_row):
                     index = (col * rows_per_column * keys_per_row) + (i * keys_per_row) + j
                     if index < len(ponumi.syllable_list):
                         syllable = ponumi.syllable_list[index]
-                        btn = SyllableKey(text=syllable, value=syllable)
-                        btn.bind(
+                        button = SyllableKey(text=syllable, value=syllable)
+                        button.background_down = down_colour
+                        button.bind(
                             on_release=self.key_release_handler, 
                             on_press=self.key_press_handler)
-                        col_layout.add_widget(btn)
+                        col_layout.add_widget(button)
 
             self.add_widget(col_layout)
 
