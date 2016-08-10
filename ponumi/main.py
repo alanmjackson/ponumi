@@ -30,7 +30,7 @@ import ponumi_osc
 #Config:
 _DEBUG = False
 
-_default_osc_ip_address = '169.254.9.91'
+_default_osc_ip_address = '127.0.0.1'
 _default_osc_port = '8000'
 _default_osc_data_address = '/notelist' 
 _default_osc_go_address = '/go'
@@ -176,6 +176,18 @@ class ConfigScreen(BoxLayout):
 
     def __init__(self, **kwargs):
         super(ConfigScreen, self).__init__(**kwargs)
+
+    def refresh_form(self, *args):
+        app = kivy.app.App.get_running_app()
+
+        print 'here!'
+
+        self.osc_ip_address.text = app.osc_ip_address
+        self.osc_port.text = app.osc_port
+        self.osc_data_address.text = app.osc_data_address
+        self.osc_go_address.text = app.osc_go_address
+        self.osc_syllable_address.text = app.osc_syllable_address
+        self.osc_syllable_gate_address.text = app.osc_syllable_gate_address
 
 
     def save_pressed(self, *args):
@@ -383,7 +395,6 @@ def set_osc_indicator(state, *largs):
     else:
         path = 'images/audio-volume-none-glitch-inv.png'
 
-    print app.osc_indicator
     app.osc_indicator.icon = path
 
 
@@ -446,7 +457,8 @@ class PonumiPerformerScreenManager(ScreenManager):
         entry_screen = Screen(name='entry_screen')
         entry_screen.add_widget(NameInputScreen())
 
-        config_screen = Screen(name='config_screen')
+        config_widget = ConfigScreen()
+        config_screen = Screen(name='config_screen', on_enter=config_widget.refresh_form)
         config_screen.add_widget(ConfigScreen())
 
         self.add_widget(entry_screen)
