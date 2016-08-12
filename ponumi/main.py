@@ -12,9 +12,11 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.textinput import TextInput
 from kivy.uix.actionbar import ActionBar
 from kivy.uix.actionbar import ActionButton
+from kivy.uix.slider import Slider
 
 from kivy.properties import StringProperty
 from kivy.properties import ListProperty
+from kivy.properties import DictProperty
 from kivy.properties import ObjectProperty
 from kivy.clock import Clock
 from kivy.storage.jsonstore import JsonStore
@@ -321,12 +323,80 @@ class RhythmScreen(BoxLayout):
     pass
 
 class VCSScreen(BoxLayout):
-    pass
+
+    def __init__(self, **kwargs):
+        super(VCSScreen, self).__init__(**kwargs)
+
+        self.orientation='horizontal'
+        slider = VCSSlider('/volume')
+        slider.bind(osc_value=self.vcs_slider_moved)
+        self.add_widget(slider)
+
+        slider = VCSSlider('/bpm')
+        slider.bind(osc_value=self.vcs_slider_moved)
+        self.add_widget(slider)
+
+        self.add_widget(Label())
+
+        slider = VCSSlider('/poem_dur')
+        slider.bind(osc_value=self.vcs_slider_moved)
+        self.add_widget(slider)
+
+        slider = VCSSlider('/poem_var')
+        slider.bind(osc_value=self.vcs_slider_moved)
+        self.add_widget(slider)
+
+        self.add_widget(Label())
+
+        slider = VCSSlider('/key_dur')
+        slider.bind(osc_value=self.vcs_slider_moved)
+        self.add_widget(slider)
+
+        slider = VCSSlider('/key_var')
+        slider.bind(osc_value=self.vcs_slider_moved)
+        self.add_widget(slider)
+
+
+    def vcs_slider_moved(self, instance, value):
+        send_osc_message(value['osc_address'], [value['value']])
 
 
 ###############################################################
 # Parts of screens
 ###############################################################
+
+
+class VCSSlider(BoxLayout):
+
+    osc_value = DictProperty(None)
+
+    def __init__(self, osc_address, **kwargs):
+        super(VCSSlider, self).__init__(**kwargs)
+
+        self.osc_address = osc_address
+
+        self.orientation = 'vertical'
+        self.slider = Slider(
+            orientation='vertical',
+            size_hint_y=0.8)
+
+        self.slider.bind(value=self.slider_moved)
+
+        label = Label(
+            text=self.osc_address.replace('_', ' ').lstrip('/'),
+            size_hint_y=0.2)
+            
+        self.add_widget(self.slider)
+        self.add_widget(label)
+
+    def slider_moved(self, instance, value):
+        self.osc_value = {
+            'osc_address':self.osc_address, 
+            'value':self.slider.value_normalized}
+
+    def on_osc_value(self, instance, value):
+        pass
+
 
 class NavBar(ActionBar):
 
@@ -547,7 +617,25 @@ def play_syllable_via_osc(syllable):
     send_osc_message(osc_syllable_address, msg)
 
 
-def set_osc_indicator(state, *largs):
+def short_flash_osc_indicator(*args):
+    flash_osc_indicator(1)
+
+def long_flash_osc_indicator(*args):
+    flash_osc_indicator(3)
+
+short_flash_osc_indicator_trigger = Clock.create_trigger(short_flash_osc_indicator)
+long_flash_osc_indicator_trigger = Clock.create_trigger(long_flash_osc_indicator)
+
+
+def flash_osc_indicator(repeats, *args):
+    for i in range(repeats):
+        Clock.schedule_once(partial(set_osc_indicator, 1),i)
+        Clock.schedule_once(partial(set_osc_indicator, 2), i + 0.25)
+        Clock.schedule_once(partial(set_osc_indicator, 3), i + 0.5)
+        Clock.schedule_once(partial(set_osc_indicator, 0), i + 0.75)
+
+
+def set_osc_indicator(state, *args):
     app = kivy.app.App.get_running_app()
 
 
@@ -583,14 +671,11 @@ def send_osc_message(osc_address, msg):
         print msg
         print "\nto: ", ip_address, port, osc_address
 
-        indicator_duration = min(5, max(1, int(len(msg) / 12)))
-
-        for i in range(indicator_duration):
-            Clock.schedule_once(partial(set_osc_indicator, 1), i + 0.25)
-            Clock.schedule_once(partial(set_osc_indicator, 2), i + 0.5)
-            Clock.schedule_once(partial(set_osc_indicator, 3), i + 0.75)
-            Clock.schedule_once(partial(set_osc_indicator, 0), i + 1.0)
-
+        if len(msg) > 12:
+            long_flash_osc_indicator_trigger()
+        else:
+            short_flash_osc_indicator_trigger()
+  
 
 
     except Exception as e:
