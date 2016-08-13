@@ -45,6 +45,7 @@ _osc_go_delay = 0.01     #seconds
 
 _ancestor = ['po', 'nu', 'mi', 'a', 'mu', 'nu', 'ma', 'ki']
 
+_poem_length = 48
 
 def make_rhythm(root):
 
@@ -288,7 +289,9 @@ class ManualScreen(BoxLayout):
 
 
     def play_pressed(self, *args):
-        poem = ponumi.Poem(self.syllables)
+        #pad the end of the poem with silence
+        syllables = self.syllables + ['-'] * (_poem_length - len(self.syllables))
+        poem = ponumi.Poem(syllables)
         if poem:
             play_poem_via_osc(poem)
 
@@ -307,12 +310,12 @@ class ManualScreen(BoxLayout):
             send_osc_syllable_gate_off()
 
     def on_syllables(self, instance, value):
-        if len(self.syllables) > 48:
-            self.syllables = self.syllables[:48]
+        if len(self.syllables) > _poem_length:
+            self.syllables = self.syllables[:_poem_length]
 
         #PoemDisplay expects a 2D array
         poem = [['' for x in range(12)] for y in range(4)]
-        for i in range(min(48, len(self.syllables))):
+        for i in range(min(_poem_length, len(self.syllables))):
             poem[int(i/12)][i % 12] = self.syllables[i]
 
         self.poem_display.syllables = poem
