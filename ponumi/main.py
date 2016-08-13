@@ -107,7 +107,7 @@ class NameInputScreen(BoxLayout):
         poem_controls.add_widget(Button(
             #text='enter',
             size_hint=[None, None],
-            size=[48, 48],
+            size=['48dp', '48dp'],
             background_normal='images/ret-no-alpha.png',
             on_release=self.enter_pressed))
 
@@ -423,7 +423,7 @@ class VCSScreen(BoxLayout):
         super(VCSScreen, self).__init__(**kwargs)
 
         self.orientation='horizontal'
-        slider = VCSSlider('/volume')
+        slider = VCSSlider('/vol')
         slider.bind(osc_value=self.vcs_slider_moved)
         self.add_widget(slider)
 
