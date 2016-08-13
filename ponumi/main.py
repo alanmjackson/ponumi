@@ -38,10 +38,24 @@ _default_osc_data_address = '/notelist'
 _default_osc_go_address = '/go'
 _default_osc_syllable_address = '/syllable'
 _default_osc_syllable_gate_address = '/syllablegate'
+_default_osc_rhythm_address = '/rhythm'
+
 
 _osc_go_delay = 0.01     #seconds
 
 _ancestor = ['po', 'nu', 'mi', 'a', 'mu', 'nu', 'ma', 'ki']
+
+
+def make_rhythm(root):
+
+    #create an 8 item rhythm_root by truncating or repeating the given root
+    q, r = divmod(8, len(root))
+    rhythm_root = root * q + root[:r]
+
+    return ponumi.create_poem(root, [])
+
+
+_default_rhythm = make_rhythm(['1'])
 
 #mac 169.254.211.66
 #kyma 169.254.157.100
@@ -86,8 +100,8 @@ class NameInputScreen(BoxLayout):
 
         poem_controls = BoxLayout(size_hint_y=0.1, spacing=15)
 
-        self.syllableEntryBox = SyllableEntryBox(size_hint_x=14)
-        poem_controls.add_widget(self.syllableEntryBox)
+        self.entryBox = EntryBox(size_hint_x=14)
+        poem_controls.add_widget(self.entryBox)
 
         poem_controls.add_widget(Button(
             #text='enter',
@@ -116,8 +130,8 @@ class NameInputScreen(BoxLayout):
 
         self.add_widget(SyllableKeyboard(
             size_hint_y=0.7, 
-            on_syllable_down=self.syllable_btn_pressed,
-            on_syllable_up=self.syllable_btn_released))
+            on_keyboard_down=self.syllable_btn_pressed,
+            on_keyboard_up=self.syllable_btn_released))
 
 
     def generate_and_show_poem(self, root_name, ancestor):
@@ -134,7 +148,7 @@ class NameInputScreen(BoxLayout):
 
     def syllable_btn_released(self, *args):
         key = args[1]
-        self.syllableEntryBox.append_syllable(key.value)
+        self.entryBox.append_syllable(key.value)
         if self.hear_button.state == 'down':
             send_osc_syllable_gate_off()
 
@@ -144,8 +158,8 @@ class NameInputScreen(BoxLayout):
     def enter_pressed(self, *args):
         global _ancestor
 
-        if len(self.syllableEntryBox.syllables) > 0:
-            self.generate_and_show_poem(self.syllableEntryBox.syllables, _ancestor)
+        if len(self.entryBox.syllables) > 0:
+            self.generate_and_show_poem(self.entryBox.syllables, _ancestor)
 
             new_ancestor = []
             for marked_syllable in self.poem.root:
@@ -153,7 +167,7 @@ class NameInputScreen(BoxLayout):
             _ancestor = new_ancestor
             
             #clear the entry box
-            self.syllableEntryBox.syllables = []
+            self.entryBox.syllables = []
         else:
             if self.poem:
                 self.generate_and_show_poem(self.poem.root_name, _ancestor)
@@ -176,6 +190,8 @@ class ConfigScreen(BoxLayout):
     osc_go_address = ObjectProperty(None)
     osc_syllable_address = ObjectProperty(None)
     osc_syllable_gate_address = ObjectProperty(None)
+    osc_rhythm_address = ObjectProperty(None)
+
 
     def __init__(self, **kwargs):
         super(ConfigScreen, self).__init__(**kwargs)
@@ -190,6 +206,7 @@ class ConfigScreen(BoxLayout):
         self.osc_go_address.text = app.osc_go_address
         self.osc_syllable_address.text = app.osc_syllable_address
         self.osc_syllable_gate_address.text = app.osc_syllable_gate_address
+        self.osc_rhythm_address.text = app.osc_rhythm_address
 
 
 
@@ -202,6 +219,7 @@ class ConfigScreen(BoxLayout):
         app.osc_go_address = self.osc_go_address.text
         app.osc_syllable_address = self.osc_syllable_address.text
         app.osc_syllable_gate_address = self.osc_syllable_gate_address.text
+        app.osc_rhythm_address = self.osc_rhythm_address.text
 
         app.save_config()
 
@@ -256,8 +274,8 @@ class ManualScreen(BoxLayout):
 
         self.add_widget(SyllableKeyboard(
             size_hint_y = 0.7,
-            on_syllable_down=self.syllable_btn_pressed,
-            on_syllable_up=self.syllable_btn_released))
+            on_keyboard_down=self.syllable_btn_pressed,
+            on_keyboard_up=self.syllable_btn_released))
 
 
     def del_pressed(self, *args):
@@ -306,8 +324,8 @@ class KeyboardScreen(BoxLayout):
         super(KeyboardScreen, self).__init__(**kwargs)
         self.add_widget(SyllableKeyboard(
             size_hint_y = 0.9,
-            on_syllable_down=self.syllable_btn_pressed,
-            on_syllable_up=self.syllable_btn_released))
+            on_keyboard_down=self.syllable_btn_pressed,
+            on_keyboard_up=self.syllable_btn_released))
 
 
     def syllable_btn_pressed(self, *args):
@@ -320,7 +338,81 @@ class KeyboardScreen(BoxLayout):
 
 
 class RhythmScreen(BoxLayout):
-    pass
+    def __init__(self, **kwargs):
+        super(RhythmScreen, self).__init__(**kwargs)
+
+        self.poem = None
+        
+        self.orientation = 'vertical'
+        self.spacing = 10
+
+        titleLayout = BoxLayout(size_hint_y=0.05)
+
+        self.poemTitle = Label(size_hint_x=0.9, font_size='24sp')
+
+        titleLayout.add_widget(self.poemTitle)
+        self.add_widget(titleLayout)
+
+
+        self.poemDisplay = PoemDisplay(size_hint_y=0.35)
+        self.add_widget(self.poemDisplay)
+
+
+        poem_controls = BoxLayout(size_hint_y=0.1, spacing=15)
+
+        self.entryBox = EntryBox(size_hint_x=14)
+        poem_controls.add_widget(self.entryBox)
+
+        poem_controls.add_widget(Button(
+            #text='enter',
+            size_hint=[None, None],
+            size=[48, 48],
+            background_normal='images/ret-no-alpha.png',
+            on_release=self.enter_pressed))
+
+        self.add_widget(poem_controls)
+
+        self.add_widget(RhythmKeyboard(
+            size_hint_y=0.7, 
+            on_keyboard_up=self.keyboard_btn_released))
+
+
+    def generate_and_show_rhythm(self, rhythm_root):
+        self.poem = make_rhythm(rhythm_root)
+        self.display_rhythm()        
+        
+    def refresh_form(self, *args):
+        app = kivy.app.App.get_running_app()
+        self.poem = app.rhythm
+        self.display_rhythm()
+
+    def display_rhythm(self):
+        self.poemDisplay.syllables = self.poem.syllables
+        self.poemTitle.text = ' '.join(self.poem.root_name)
+
+
+    def keyboard_btn_released(self, *args):
+        key = args[1]
+        self.entryBox.append_syllable(key.value)
+
+
+    def enter_pressed(self, *args):
+
+        if len(self.entryBox.syllables) > 0:
+
+            self.generate_and_show_rhythm(self.entryBox.syllables)
+
+            #clear the entry box
+            self.entryBox.syllables = []
+        else:
+            if self.poem:
+                self.generate_and_show_rhythm(self.poem.root_name)
+            else:
+                self.generate_and_show_rhythm(['1'])
+
+        app = kivy.app.App.get_running_app()
+        app.rhythm = self.poem
+
 
 class VCSScreen(BoxLayout):
 
@@ -416,6 +508,7 @@ class NavBar(ActionBar):
 
     def rhythm_pressed(self, *args):
         kivy.app.App.get_running_app().screen_manager.current = 'rhythm_screen'
+        kivy.app.App.get_running_app().screen_manager.current_screen.children[0].refresh_form()
 
     def vcs_pressed(self, *args):
         kivy.app.App.get_running_app().screen_manager.current = 'vcs_screen'
@@ -470,11 +563,11 @@ class PoemDisplay(GridLayout):
 
 
 
-class SyllableKey(Button):
+class Key(Button):
     value = StringProperty()
 
     def __init__(self, **kwargs):
-        super(SyllableKey, self).__init__(**kwargs)
+        super(Key, self).__init__(**kwargs)
 
         #self.background_color = (127,127,127,1.0)
         self.color = (0,0,0,1.0)
@@ -482,12 +575,32 @@ class SyllableKey(Button):
         self.background_normal = 'images/button_texture_white.png'
 
 
-class SyllableKeyboard(BoxLayout):
+class Keyboard(BoxLayout):
+    #Base class for keyboards, eg. SyllableKeyboard
 
     def __init__(self, **kwargs):
-        self.register_event_type('on_syllable_down')
-        self.register_event_type('on_syllable_up')
+        self.register_event_type('on_keyboard_down')
+        self.register_event_type('on_keyboard_up')
 
+        super(Keyboard, self).__init__(**kwargs)
+
+
+    def key_press_handler(self, *args):
+        self.dispatch('on_keyboard_down', args[0])
+
+    def key_release_handler(self, *args):
+        self.dispatch('on_keyboard_up', args[0])
+
+    def on_keyboard_down(self, *args):
+        pass
+
+    def on_keyboard_up(self, *args):
+        pass
+
+
+class SyllableKeyboard(Keyboard):
+
+    def __init__(self, **kwargs):
         super(SyllableKeyboard, self).__init__(**kwargs)
 
         self.spacing = 40
@@ -519,8 +632,10 @@ class SyllableKeyboard(BoxLayout):
                     index = (col * rows_per_column * keys_per_row) + (i * keys_per_row) + j
                     if index < len(ponumi.syllable_list):
                         syllable = ponumi.syllable_list[index]
-                        button = SyllableKey(text=syllable, value=syllable)
-                        button.background_down = down_colour
+                        button = Key(
+                            text=syllable, 
+                            value=syllable, 
+                            background_down=down_colour)
                         button.bind(
                             on_release=self.key_release_handler, 
                             on_press=self.key_press_handler)
@@ -528,24 +643,40 @@ class SyllableKeyboard(BoxLayout):
 
             self.add_widget(col_layout)
 
-    def key_press_handler(self, *args):
-        self.dispatch('on_syllable_down', args[0])
 
-    def key_release_handler(self, *args):
-        self.dispatch('on_syllable_up', args[0])
+class RhythmKeyboard(Keyboard):
 
-    def on_syllable_down(self, *args):
-        pass
+    def __init__(self, **kwargs):
+        super(RhythmKeyboard, self).__init__(**kwargs)
 
-    def on_syllable_up(self, *args):
-        pass
+        self.spacing = 40
+
+        button = Key(
+            text='0', 
+            value='0',
+            background_down='images/button_pressed_magenta.png')
+        button.bind(
+            on_release=self.key_release_handler, 
+            on_press=self.key_press_handler)
+
+        self.add_widget(button)
+
+        button = Key(
+            text='1', 
+            value='1',
+            background_down='images/button_pressed_magenta.png')
+        button.bind(
+            on_release=self.key_release_handler, 
+            on_press=self.key_press_handler)
+
+        self.add_widget(button)
 
 
-class SyllableEntryBox(BoxLayout):
+class EntryBox(BoxLayout):
     syllables = ListProperty([])
 
     def __init__(self, **kwargs):
-        super(SyllableEntryBox, self).__init__(**kwargs)
+        super(EntryBox, self).__init__(**kwargs)
 
         self.textWidget = Label(text='', size_hint_x=13, font_size='30sp')
         self.add_widget(self.textWidget)
@@ -574,47 +705,61 @@ class SyllableEntryBox(BoxLayout):
 ###############################################################
 
 
-def play_poem_via_osc(poem):
-    osc_data_address = kivy.app.App.get_running_app().osc_data_address
-    msg = ponumi_osc.poem_to_kyma_osc(poem)
+def send_rhythm_via_osc():
+    app = kivy.app.App.get_running_app()
+    osc_address = app.osc_rhythm_address
+    rhythm = kivy.app.App.get_running_app().rhythm.syllables
+    rhythm = ponumi.flatten(rhythm)
 
-    send_osc_message(osc_data_address, msg)
+    msg = []
+    for beat in rhythm:
+        msg.append(float(beat))
+
+    send_osc_message(osc_address, msg)
+
+
+def play_poem_via_osc(poem):
+    send_rhythm_via_osc()
+
+    osc_address = kivy.app.App.get_running_app().osc_data_address
+    msg = ponumi_osc.poem_to_kyma_osc(poem)
+    send_osc_message(osc_address, msg)
 
     #queue up the gate signal
     Clock.schedule_once(send_osc_go_on_signal, _osc_go_delay)
 
 
 def send_osc_go_on_signal(*args):
-    osc_go_address = kivy.app.App.get_running_app().osc_go_address
+    osc_address = kivy.app.App.get_running_app().osc_go_address
 
     #send the gate on signal (ie the rising edge of the gate signal)
-    send_osc_message(osc_go_address, [1.0])
+    send_osc_message(osc_address, [1.0])
     #queue up the gate off signal (ie the falling edge)
     Clock.schedule_once(send_osc_go_off_signal, _osc_go_delay)
 
 def send_osc_go_off_signal(*args):
-    osc_go_address = kivy.app.App.get_running_app().osc_go_address
+    osc_address = kivy.app.App.get_running_app().osc_go_address
 
-    send_osc_message(osc_go_address, [0.0])
+    send_osc_message(osc_address, [0.0])
 
 
 def send_osc_syllable_gate_on(*args):
-    osc_syllable_gate_address = kivy.app.App.get_running_app().osc_syllable_gate_address
+    osc_address = kivy.app.App.get_running_app().osc_syllable_gate_address
 
-    send_osc_message(osc_syllable_gate_address, [1.0])
+    send_osc_message(osc_address, [1.0])
 
 def send_osc_syllable_gate_off(*args):
-    osc_syllable_gate_address = kivy.app.App.get_running_app().osc_syllable_gate_address
+    osc_address = kivy.app.App.get_running_app().osc_syllable_gate_address
 
-    send_osc_message(osc_syllable_gate_address, [0.0])
+    send_osc_message(osc_address, [0.0])
 
 
 
 def play_syllable_via_osc(syllable):
-    osc_syllable_address = kivy.app.App.get_running_app().osc_syllable_address
+    osc_address = kivy.app.App.get_running_app().osc_syllable_address
     msg = ponumi_osc.syllables_to_kyma_osc([syllable])
 
-    send_osc_message(osc_syllable_address, msg)
+    send_osc_message(osc_address, msg)
 
 
 def short_flash_osc_indicator(*args):
@@ -742,6 +887,8 @@ class PonumiPerformer(App):
     osc_go_address = StringProperty(_default_osc_go_address)
     osc_syllable_address = StringProperty(_default_osc_syllable_address)
     osc_syllable_gate_address = StringProperty(_default_osc_syllable_gate_address)
+    osc_rhythm_address = StringProperty(_default_osc_rhythm_address)
+
 
     osc_indicator = ObjectProperty(None)
 
@@ -750,6 +897,7 @@ class PonumiPerformer(App):
         super(PonumiPerformer, self).__init__(**kwargs)
         data_dir = getattr(self, 'user_data_dir')
         self.config_store = JsonStore(join(data_dir, 'ponumiperformer.json'))
+        self.rhythm = _default_rhythm
         oscAPI.init()
 
 
@@ -775,7 +923,8 @@ class PonumiPerformer(App):
             osc_data_address=self.osc_data_address,
             osc_go_address=self.osc_go_address,
             osc_syllable_address=self.osc_syllable_address,
-            osc_syllable_gate_address=self.osc_syllable_gate_address)
+            osc_syllable_gate_address=self.osc_syllable_gate_address,
+            osc_rhythm_address=self.osc_rhythm_address)            
 
 
     def load_config(self):
@@ -789,6 +938,7 @@ class PonumiPerformer(App):
             if 'osc_go_address' in config: self.osc_go_address = config['osc_go_address']
             if 'osc_syllable_address' in config: self.osc_syllable_address = config['osc_syllable_address']
             if 'osc_syllable_gate_address' in config: self.osc_syllable_gate_address = config['osc_syllable_gate_address']
+            if 'osc_rhythm_address' in config: self.osc_rhythm_address = config['osc_rhythm_address']
 
 
     def load_default_config(self):
@@ -798,6 +948,7 @@ class PonumiPerformer(App):
         self.osc_go_address = _default_osc_go_address
         self.osc_syllable_address = _default_osc_syllable_address
         self.osc_syllable_gate_address = _default_osc_syllable_gate_address
+        self.osc_rhythm_address = _default_osc_rhythm_address
 
 
 

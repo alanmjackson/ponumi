@@ -57,6 +57,7 @@
 	osc_go_address: osc_go_address
 	osc_syllable_address: osc_syllable_address
 	osc_syllable_gate_address: osc_syllable_gate_address
+	osc_rhythm_address: osc_rhythm_address
 
 
 	orientation: 'vertical'
@@ -100,12 +101,21 @@
 			id: osc_syllable_address
 			text: app.osc_syllable_address
 			multiline: False
+
 		Label:
 			text: 'osc syllable gate address'
 		TextInput:
 			id: osc_syllable_gate_address
 			text: app.osc_syllable_gate_address
 			multiline: False
+
+		Label:
+			text: 'osc rhythm address'
+		TextInput:
+			id: osc_rhythm_address
+			text: app.osc_rhythm_address
+			multiline: False
+
 
 
 	BoxLayout:
@@ -128,5 +138,3 @@
 
 
 <RhythmScreen>:
-	Label:
-		text: 'The Rhythm Screen'
