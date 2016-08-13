@@ -49,8 +49,7 @@ RHYMING_SCHEME = ((o, x, o, o, x, x, a, o, x, o, o, x),
                   (o, o, x, x, o, o, x, x, o, o, x, x),
                   (o, x, o, o, x, x, a, o, x, x, o, a))
 
-
-
+null_syllables = ['-']
 ending_syllables = ["n"]
 
 syllable_left_roots = ["b", "ch", "d", "f", "g", "h", "j", "k", "m", "n", 
@@ -58,7 +57,8 @@ syllable_left_roots = ["b", "ch", "d", "f", "g", "h", "j", "k", "m", "n",
 
 syllable_right_roots = ["a", "e", "i", "o", "u"]
 
-syllable_table = [syllable_right_roots]
+syllable_table = [null_syllables]
+syllable_table.append(syllable_right_roots)
 for left_root in syllable_left_roots:
     syllable_row = []
     for right_root in syllable_right_roots:
@@ -74,10 +74,12 @@ for row in syllable_table:
 # the list of syllables with corresponding note numbers
 syllables = dict( zip(syllable_list, range(0, len(syllable_list)) ) )
 
+
 '''
 The constructed syllable list with note numbers.
 This list can be generated using note_table_to_string().
 
+ :      0
 a:      1
 e:      2
 i:      3

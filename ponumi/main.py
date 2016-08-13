@@ -629,9 +629,15 @@ class SyllableKeyboard(Keyboard):
             for i in range(rows_per_column):
                 down_colour = down_colours[i]
                 for j in range(keys_per_row):
-                    index = (col * rows_per_column * keys_per_row) + (i * keys_per_row) + j
-                    if index < len(ponumi.syllable_list):
-                        syllable = ponumi.syllable_list[index]
+                    #Adding 1 on to the index so the silent syllable is initially skipped... 
+                    index = (col * rows_per_column * keys_per_row) + (i * keys_per_row) + j + 1
+                    if index <= len(ponumi.syllable_list):
+                        if index < len(ponumi.syllable_list):
+                            syllable = ponumi.syllable_list[index]
+                        #...and then append the silent syllable button at the end
+                        else:
+                            syllable = ponumi.syllable_list[0]
+
                         button = Key(
                             text=syllable, 
                             value=syllable, 
@@ -640,6 +646,7 @@ class SyllableKeyboard(Keyboard):
                             on_release=self.key_release_handler, 
                             on_press=self.key_press_handler)
                         col_layout.add_widget(button)
+
 
             self.add_widget(col_layout)
 
@@ -963,8 +970,8 @@ if __name__ == '__main__':
     syllable_list = copy.copy(ponumi.syllable_list)
     syllable_list.remove('zu')
     syllable_list.remove('n')
-    syllable_list.insert(9, 'zu')
-    syllable_list.insert(10, 'n')
+    syllable_list.insert(10, 'zu')
+    syllable_list.insert(11, 'n')
     ponumi.syllables = dict( zip(syllable_list, range(0, len(syllable_list) ) ) )
     #END
 
