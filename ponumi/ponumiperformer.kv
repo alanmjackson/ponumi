@@ -9,33 +9,39 @@
             with_previous: False
             app_icon: 'images/logo.png'
 
-        ActionButton:
-        	background_normal: 'images/poem-glitch-inv.png'
+        ActionToggleButton:
+            group: 'screens'
+        	icon: 'images/poem-glitch-inv.png'
         	background_down: 'images/poem-glitch.png'
         	on_release: root.entry_pressed()
 
-        ActionButton:
-        	background_normal: 'images/manual-glitch-inv.png'
+        ActionToggleButton:
+            group: 'screens'
+        	icon: 'images/manual-glitch-inv.png'
         	background_down: 'images/manual-glitch.png'
         	on_release: root.keyboard_pressed()
 
-        ActionButton:
-        	background_normal: 'images/laser-glitch-inv.png'
+        ActionToggleButton:
+            group: 'screens'
+        	icon: 'images/laser-glitch-inv.png'
         	background_down: 'images/laser-glitch.png'
         	on_release: root.manual_pressed()
 
-        ActionButton:
-        	background_normal: 'images/rhythm-glitch-inv.png'
+        ActionToggleButton:
+            group: 'screens'
+        	icon: 'images/rhythm-glitch-inv.png'
         	background_down: 'images/rhythm-glitch.png'
         	on_release: root.rhythm_pressed()
 
-        ActionButton:
-        	background_normal: 'images/vcs-glitch-inv.png'
+        ActionToggleButton:
+            group: 'screens'
+        	icon: 'images/vcs-glitch-inv.png'
         	background_down: 'images/vcs-glitch.png'
         	on_release: root.vcs_pressed()
 
-        ActionButton:
-            background_normal: 'images/config-glitch-inv.png'
+        ActionToggleButton:
+            group: 'screens'
+            icon: 'images/config-glitch-inv.png'
             background_down: 'images/config-glitch.png'
             on_release: root.config_pressed()
 

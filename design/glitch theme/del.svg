@@ -9,14 +9,14 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="48"
-   height="48"
-   viewBox="0 0 48 47.999999"
+   width="96"
+   height="96"
+   viewBox="0 0 96 95.999998"
    id="svg2"
    version="1.1"
    inkscape:version="0.91 r13725"
    sodipodi:docname="del.svg"
-   inkscape:export-filename="/Users/user/sync/git/ponumi/ponumi/images/rhythm.png"
+   inkscape:export-filename="/Users/user/sync/git/ponumi/ponumi/images/del.png"
    inkscape:export-xdpi="90"
    inkscape:export-ydpi="90">
   <defs
@@ -43,9 +43,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="10.24"
-     inkscape:cx="23.662286"
-     inkscape:cy="20.866393"
+     inkscape:zoom="2.56"
+     inkscape:cx="19.218927"
+     inkscape:cy="38.661573"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
@@ -83,10 +83,10 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-122.22852,-598.28125)">
+     transform="translate(-122.22852,-550.28125)">
     <path
        style="fill:#000000;stroke:none;stroke-opacity:1"
-       d="m 143.22852,613.28125 -9,7 9,8 16,0 0,-15 -16,0 z m 3.62109,2.30469 4.24219,4.24218 4.24219,-4.24218 0.70703,0.70703 -4.24219,4.24219 4.24219,4.24218 -0.70703,0.70703 -4.24219,-4.24218 -4.24219,4.24218 -0.70703,-0.70703 4.24219,-4.24218 -4.24219,-4.24219 0.70703,-0.70703 z"
+       d="m 160.14852,577.28125 -25.92,20.06667 25.92,22.93333 46.08,0 0,-43 -46.08,0 z m 10.42874,6.60677 12.21751,12.16092 12.21751,-12.16092 2.03624,2.02683 -12.21751,12.16094 12.21751,12.16092 -2.03624,2.02682 -12.21751,-12.16092 -12.21751,12.16092 -2.03625,-2.02682 12.21751,-12.16092 -12.21751,-12.16094 2.03625,-2.02683 z"
        id="rect4795"
        inkscape:connector-curvature="0" />
   </g>

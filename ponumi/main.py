@@ -13,6 +13,9 @@ from kivy.uix.textinput import TextInput
 from kivy.uix.actionbar import ActionBar
 from kivy.uix.actionbar import ActionButton
 from kivy.uix.slider import Slider
+from kivy.uix.image import Image
+from kivy.uix.behaviors import ButtonBehavior
+from kivy.uix.behaviors import ToggleButtonBehavior
 
 from kivy.properties import StringProperty
 from kivy.properties import ListProperty
@@ -104,25 +107,28 @@ class NameInputScreen(BoxLayout):
         self.entryBox = EntryBox(size_hint_x=14)
         poem_controls.add_widget(self.entryBox)
 
-        poem_controls.add_widget(Button(
+        poem_controls.add_widget(IconButton(
             #text='enter',
             size_hint=[None, None],
             size=['48dp', '48dp'],
-            background_normal='images/ret-no-alpha.png',
+            up_image='images/ret-no-alpha.png',
+            down_image='images/ret-no-alpha-glitch-inv.png',
             on_release=self.enter_pressed))
 
-        poem_controls.add_widget(Button(
+        poem_controls.add_widget(IconButton(
             #text='play',
             size_hint=[None, None],
-            size=[48, 48],
-            background_normal='images/play-no-alpha.png', 
+            size=['48dp', '48dp'],
+            up_image='images/play-no-alpha.png',
+            down_image='images/play-no-alpha-glitch-inv.png', 
             on_release=self.play_pressed))
 
-        self.hear_button = ToggleButton(
+        self.hear_button = IconToggleButton(
             #text='hear',
             size_hint=[None, None],
-            size=[48, 48],
-            background_normal='images/hear-no-alpha.png')
+            size=['48dp', '48dp'],
+            up_image='images/hear-no-alpha.png',
+            down_image='images/hear-no-alpha-glitch-inv.png')
 
         poem_controls.add_widget(self.hear_button)
 
@@ -241,32 +247,36 @@ class ManualScreen(BoxLayout):
         controls = BoxLayout(size_hint_y=0.1, spacing=15)
 
         controls.add_widget(Label(size_hint_x=12))
-        controls.add_widget(Button(
+        controls.add_widget(IconButton(
             #text='del',
             size_hint=[None, None],
-            size=[48, 48],
-            background_normal='images/del-no-alpha.png',
+            size=['48dp', '48dp'],
+            up_image='images/del-no-alpha.png',
+            down_image='images/del-no-alpha-glitch-inv.png',
             on_release=self.del_pressed))
 
-        controls.add_widget(Button(
+        controls.add_widget(IconButton(
             #text='clear',
             size_hint=[None, None],
-            size=[48, 48],
-            background_normal='images/clear-no-alpha.png',
+            size=['48dp', '48dp'],
+            up_image='images/clear-no-alpha.png',
+            down_image='images/clear-no-alpha-glitch-inv.png',
             on_release=self.clear_pressed))
 
-        controls.add_widget(Button(
+        controls.add_widget(IconButton(
             #text='play',
             size_hint=[None, None],
-            size=[48, 48],
-            background_normal='images/play-no-alpha.png', 
+            size=['48dp', '48dp'],
+            up_image='images/play-no-alpha.png',
+            down_image='images/play-no-alpha-glitch-inv.png', 
             on_release=self.play_pressed))
 
-        self.hear_button = ToggleButton(
+        self.hear_button = IconToggleButton(
             #text='hear',
             size_hint=[None, None],
-            size=[48, 48],
-            background_normal='images/hear-no-alpha.png')
+            size=['48dp', '48dp'],
+            up_image='images/hear-no-alpha.png',
+            down_image='images/hear-no-alpha-glitch-inv.png')
 
         controls.add_widget(self.hear_button)
 
@@ -366,11 +376,12 @@ class RhythmScreen(BoxLayout):
         self.entryBox = EntryBox(size_hint_x=14)
         poem_controls.add_widget(self.entryBox)
 
-        poem_controls.add_widget(Button(
+        poem_controls.add_widget(IconButton(
             #text='enter',
             size_hint=[None, None],
-            size=[48, 48],
-            background_normal='images/ret-no-alpha.png',
+            size=['48dp', '48dp'],
+            up_image='images/ret-no-alpha.png',
+            down_image='images/ret-no-alpha-glitch-inv.png',
             on_release=self.enter_pressed))
 
         self.add_widget(poem_controls)
@@ -459,6 +470,57 @@ class VCSScreen(BoxLayout):
 ###############################################################
 # Parts of screens
 ###############################################################
+
+
+class IconButton(ButtonBehavior, Image):
+
+    def __init__(self, down_image=None, up_image=None, **kwargs):
+        super(IconButton, self).__init__(**kwargs)
+
+        self.allow_stretch = True
+
+        self.up_image = up_image
+        if up_image:
+            self.source = up_image
+
+        if down_image:
+            self.down_image = down_image
+        else:
+            self.down_image = up_image
+
+    def on_press(self):
+        if self.down_image:
+            self.source = self.down_image
+
+    def on_release(self):
+        if self.up_image:
+            self.source = self.up_image
+
+
+class IconToggleButton(ToggleButtonBehavior, Image):
+
+    def __init__(self, down_image=None, up_image=None, **kwargs):
+        super(IconToggleButton, self).__init__(**kwargs)
+
+        self.allow_stretch = True
+
+        self.up_image = up_image
+        if up_image:
+            self.source = up_image
+
+        if down_image:
+            self.down_image = down_image
+        else:
+            self.down_image = up_image
+
+    def on_state(self, widget, value):
+        if value == 'down':
+            if self.down_image:
+                self.source = self.down_image
+        else:
+            if self.up_image:
+                self.source = self.up_image
+
 
 
 class VCSSlider(BoxLayout):
@@ -690,13 +752,14 @@ class EntryBox(BoxLayout):
 
         self.textWidget = Label(text='', size_hint_x=13, font_size='30sp')
         self.add_widget(self.textWidget)
-        self.add_widget(Button(
+        self.add_widget(IconButton(
             #text='del', 
             size_hint_x=None,
             size_hint_y=None,
-            size=[48, 48],
+            size=['48dp', '48dp'],
             background_color=[127,127,127,1.0],
-            background_normal='images/del-no-alpha.png', 
+            up_image='images/del-no-alpha.png',
+            down_image='images/del-no-alpha-glitch-inv.png', 
             on_release=self.delete))
 
     def on_syllables(self, instance, value):
