@@ -90,19 +90,28 @@ class NameInputScreen(BoxLayout):
         self.orientation = 'vertical'
         self.spacing = 10
 
+        top = BoxLayout(
+            orientation='horizontal', 
+            spacing=2, 
+            size_hint_y=0.5)
+        
+        top_left = BoxLayout(
+            orientation='vertical', 
+            size_hint_x=0.9)
+
         titleLayout = BoxLayout(size_hint_y=0.05)
 
         self.poemTitle = Label(size_hint_x=0.9, font_size='24sp')
 
         titleLayout.add_widget(self.poemTitle)
-        self.add_widget(titleLayout)
+        top_left.add_widget(titleLayout)
 
 
         self.poemDisplay = PoemDisplay(size_hint_y=0.35)
-        self.add_widget(self.poemDisplay)
+        top_left.add_widget(self.poemDisplay)
 
 
-        poem_controls = BoxLayout(size_hint_y=0.1, spacing=15)
+        poem_controls = BoxLayout(size_hint_y=0.1, spacing=2)
 
         self.entryBox = EntryBox(size_hint_x=14)
         poem_controls.add_widget(self.entryBox)
@@ -115,13 +124,37 @@ class NameInputScreen(BoxLayout):
             down_image='images/ret-no-alpha-glitch-inv.png',
             on_release=self.enter_pressed))
 
-        poem_controls.add_widget(IconButton(
+
+
+        play_controls = BoxLayout(
+            orientation='vertical', 
+            size_hint_x=None,
+            size=['48dp', 0],
+            spacing=2)
+
+        play_controls.add_widget(IconButton(
             #text='play',
             size_hint=[None, None],
             size=['48dp', '48dp'],
             up_image='images/play-no-alpha.png',
             down_image='images/play-no-alpha-glitch-inv.png', 
             on_release=self.play_pressed))
+
+        play_controls.add_widget(VCSButton(
+            #text='stop',
+            osc_address='/stop',
+            size_hint=[None, None],
+            size=['48dp', '48dp'],
+            up_image='images/stop-no-alpha.png',
+            down_image='images/stop-no-alpha-glitch-inv.png'))
+
+        play_controls.add_widget(VCSToggleButton(
+            #text='loop',
+            osc_address='/loop',
+            size_hint=[None, None],
+            size=['48dp', '48dp'],
+            up_image='images/loop-no-alpha.png',
+            down_image='images/loop-no-alpha-glitch-inv.png'))
 
         self.hear_button = IconToggleButton(
             #text='hear',
@@ -130,11 +163,15 @@ class NameInputScreen(BoxLayout):
             up_image='images/hear-no-alpha.png',
             down_image='images/hear-no-alpha-glitch-inv.png')
 
-        poem_controls.add_widget(self.hear_button)
+        play_controls.add_widget(self.hear_button)
 
 
-        self.add_widget(poem_controls)
+        top_left.add_widget(poem_controls)
 
+        top.add_widget(top_left)
+        top.add_widget(play_controls)
+
+        self.add_widget(top)
         self.add_widget(SyllableKeyboard(
             size_hint_y=0.7, 
             on_keyboard_down=self.syllable_btn_pressed,
@@ -181,11 +218,9 @@ class NameInputScreen(BoxLayout):
             else:
                 self.generate_and_show_poem(_ancestor, _ancestor)
 
-
     def play_pressed(self, *args):
         if self.poem:
             play_poem_via_osc(self.poem)
-        
 
 
 
@@ -435,36 +470,36 @@ class VCSScreen(BoxLayout):
 
         self.orientation='horizontal'
         slider = VCSSlider('/vol')
-        slider.bind(osc_value=self.vcs_slider_moved)
+        #slider.bind(osc_value=self.vcs_slider_moved)
         self.add_widget(slider)
 
         slider = VCSSlider('/bpm')
-        slider.bind(osc_value=self.vcs_slider_moved)
+        #slider.bind(osc_value=self.vcs_slider_moved)
         self.add_widget(slider)
 
         self.add_widget(Label())
 
         slider = VCSSlider('/poem_dur')
-        slider.bind(osc_value=self.vcs_slider_moved)
+        #slider.bind(osc_value=self.vcs_slider_moved)
         self.add_widget(slider)
 
         slider = VCSSlider('/poem_var')
-        slider.bind(osc_value=self.vcs_slider_moved)
+        #slider.bind(osc_value=self.vcs_slider_moved)
         self.add_widget(slider)
 
         self.add_widget(Label())
 
         slider = VCSSlider('/key_dur')
-        slider.bind(osc_value=self.vcs_slider_moved)
+        #slider.bind(osc_value=self.vcs_slider_moved)
         self.add_widget(slider)
 
         slider = VCSSlider('/key_var')
-        slider.bind(osc_value=self.vcs_slider_moved)
+        #slider.bind(osc_value=self.vcs_slider_moved)
         self.add_widget(slider)
 
 
-    def vcs_slider_moved(self, instance, value):
-        send_osc_message(value['osc_address'], [value['value']])
+    #def vcs_slider_moved(self, instance, value):
+    #    send_osc_message(value['osc_address'], [value['value']])
 
 
 ###############################################################
@@ -522,10 +557,41 @@ class IconToggleButton(ToggleButtonBehavior, Image):
                 self.source = self.up_image
 
 
+class VCSToggleButton(IconToggleButton):
+
+    def __init__(self, osc_address, down_value=1, up_value=0, **kwargs):
+        super(VCSToggleButton, self).__init__(**kwargs)
+        self.osc_address = osc_address
+        self.down_value = down_value
+        self.up_value = up_value
+
+    def on_state(self, widget, value):
+        super(VCSToggleButton, self).on_state(widget, value)
+        if value == 'down':
+            send_osc_message(self.osc_address, [self.down_value])
+        else:
+            send_osc_message(self.osc_address, [self.up_value])
+
+
+class VCSButton(IconButton):
+
+    def __init__(self, osc_address, down_value=1, up_value=0, **kwargs):
+        super(VCSButton, self).__init__(**kwargs)
+        self.osc_address = osc_address
+        self.down_value = down_value
+        self.up_value = up_value
+
+    def on_press(self):
+        super(VCSButton, self).on_press()
+        send_osc_message(self.osc_address, [self.down_value])
+
+    def on_release(self):
+        super(VCSButton, self).on_release()
+        send_osc_message(self.osc_address, [self.up_value])
+
 
 class VCSSlider(BoxLayout):
 
-    osc_value = DictProperty(None)
 
     def __init__(self, osc_address, **kwargs):
         super(VCSSlider, self).__init__(**kwargs)
@@ -547,12 +613,8 @@ class VCSSlider(BoxLayout):
         self.add_widget(label)
 
     def slider_moved(self, instance, value):
-        self.osc_value = {
-            'osc_address':self.osc_address, 
-            'value':self.slider.value_normalized}
+        send_osc_message(self.osc_address, [self.slider.value_normalized])
 
-    def on_osc_value(self, instance, value):
-        pass
 
 
 class NavBar(ActionBar):
@@ -668,7 +730,7 @@ class SyllableKeyboard(Keyboard):
     def __init__(self, **kwargs):
         super(SyllableKeyboard, self).__init__(**kwargs)
 
-        self.spacing = 40
+        self.spacing = 33
 
         columns = 3
         keys_per_row = 5
