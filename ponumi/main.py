@@ -16,6 +16,7 @@ from kivy.uix.slider import Slider
 from kivy.uix.image import Image
 from kivy.uix.behaviors import ButtonBehavior
 from kivy.uix.behaviors import ToggleButtonBehavior
+from kivy.graphics import Color, Rectangle
 
 from kivy.properties import StringProperty
 from kivy.properties import ListProperty
@@ -38,10 +39,12 @@ _DEBUG = False
 _default_osc_ip_address = '127.0.0.1'
 _default_osc_port = '8000'
 _default_osc_data_address = '/notelist' 
-_default_osc_go_address = '/go'
+_default_osc_go_address = '/start'
 _default_osc_syllable_address = '/syllable'
 _default_osc_syllable_gate_address = '/syllablegate'
 _default_osc_rhythm_address = '/rhythm'
+_default_osc_stop_address = '/stop'
+_default_osc_loop_address = '/loop'
 
 
 _osc_go_delay = 0.01     #seconds
@@ -142,7 +145,7 @@ class NameInputScreen(BoxLayout):
 
         play_controls.add_widget(VCSButton(
             #text='stop',
-            osc_address='/stop',
+            osc_address=_default_osc_stop_address,
             size_hint=[None, None],
             size=['48dp', '48dp'],
             up_image='images/stop-no-alpha.png',
@@ -150,7 +153,7 @@ class NameInputScreen(BoxLayout):
 
         play_controls.add_widget(VCSToggleButton(
             #text='loop',
-            osc_address='/loop',
+            osc_address=_default_osc_loop_address,
             size_hint=[None, None],
             size=['48dp', '48dp'],
             up_image='images/loop-no-alpha.png',
@@ -666,11 +669,30 @@ class PoemDisplay(GridLayout):
         for i in range(4):
             display_row = []
             for j in range(12):
-                syllable_widget = Label(text='', font_size='20sp')
+                syllable_widget = Label(
+                    text='', 
+                    font_size='20sp', 
+                    on_touch_up=self.selected)
+                
                 display_row.append(syllable_widget)
                 self.add_widget(syllable_widget)
 
             self.display_syllables.append(display_row)
+
+            #App.get_running_app().bind(input_focus=self.on_focus)
+
+    def selected(self, widget, value):
+        App.get_running_app().input_focus = widget
+
+
+    def on_focus(self, widget, focussed_widget):
+
+        if is_descendent(focussed_widget, self):
+            with focussed_widget.canvas.before:
+                Color(1., 1., 1.)
+                Rectangle(pos=focussed_widget.pos, size=focussed_widget.size)
+        else:
+            focussed_widget.canvas.clear()
 
 
     def on_syllables(self, instance, value):
@@ -812,8 +834,16 @@ class EntryBox(BoxLayout):
     def __init__(self, **kwargs):
         super(EntryBox, self).__init__(**kwargs)
 
-        self.textWidget = Label(text='', size_hint_x=13, font_size='30sp')
-        self.add_widget(self.textWidget)
+        self.textWidget = Label(
+            text='', 
+            size_hint_x=13, 
+            font_size='30sp',
+            on_touch_up=self.selected)
+
+        textWidgetBorder = BoxLayout(padding=[10,0])
+        textWidgetBorder.add_widget(self.textWidget)
+
+        self.add_widget(textWidgetBorder)
         self.add_widget(IconButton(
             #text='del', 
             size_hint_x=None,
@@ -823,6 +853,31 @@ class EntryBox(BoxLayout):
             up_image='images/del-no-alpha.png',
             down_image='images/del-no-alpha-glitch-inv.png', 
             on_release=self.delete))
+
+        #App.get_running_app().bind(input_focus=self.on_focus)
+
+    def on_focus(self, widget, value):
+
+        textwidget = self.textWidget
+        
+        if value == textwidget:
+            with textwidget.canvas.before:
+                Color(1., 1., 1.)
+                Rectangle(
+                    size=[textwidget.size[0]+2, textwidget.size[1]+2], 
+                    pos=[textwidget.pos[0]-1, textwidget.pos[1]-1])
+                Color(0, 0, 0)
+                Rectangle(
+                    size=textwidget.size, 
+                    pos=textwidget.pos)
+        else:
+            textwidget.canvas.clear()
+
+
+    def selected(self, *args):
+
+        App.get_running_app().input_focus = self.textWidget
+
 
     def on_syllables(self, instance, value):
         self.textWidget.text = ' '.join(self.syllables)
@@ -834,10 +889,30 @@ class EntryBox(BoxLayout):
         if len(self.syllables) > 0:
             self.syllables.pop()
 
+ 
+
+
 
 ###############################################################
 #Functions
 ###############################################################
+
+
+def is_ancestor(parent, child):
+    return is_descendent(child, parent)
+
+
+def is_descendent(child, parent):
+
+    if hasattr(child, 'parent'):
+        if child.parent == parent:
+            return True
+        elif child.parent == child:
+            return False
+        else:
+            return is_descendent(child.parent, parent)
+    else:
+        return False
 
 
 def send_rhythm_via_osc():
@@ -1024,9 +1099,9 @@ class PonumiPerformer(App):
     osc_syllable_gate_address = StringProperty(_default_osc_syllable_gate_address)
     osc_rhythm_address = StringProperty(_default_osc_rhythm_address)
 
-
     osc_indicator = ObjectProperty(None)
 
+    input_focus = ObjectProperty(None)
 
     def __init__(self, **kwargs):
         super(PonumiPerformer, self).__init__(**kwargs)
@@ -1094,13 +1169,13 @@ if __name__ == '__main__':
     # Temporary tweaking of ponumi syllables to compensate for a couple of anomalies 
     # in the index order of the Steph101.wav file:
     #START
-    import copy
-    syllable_list = copy.copy(ponumi.syllable_list)
-    syllable_list.remove('zu')
-    syllable_list.remove('n')
-    syllable_list.insert(10, 'zu')
-    syllable_list.insert(11, 'n')
-    ponumi.syllables = dict( zip(syllable_list, range(0, len(syllable_list) ) ) )
+    #import copy
+    #syllable_list = copy.copy(ponumi.syllable_list)
+    #syllable_list.remove('zu')
+    #syllable_list.remove('n')
+    #syllable_list.insert(10, 'zu')
+    #syllable_list.insert(11, 'n')
+    #ponumi.syllables = dict( zip(syllable_list, range(0, len(syllable_list) ) ) )
     #END
 
     PonumiPerformer().run()

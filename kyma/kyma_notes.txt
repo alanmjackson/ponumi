@@ -1,0 +1,20 @@
+((!SyllableGate nextIndex - (!Start sampleAndHold: !SyllableGate nextIndex + 1)) mod: 48)
+
+Experiments that didn't work:
+
+"IF !Start==1 then reset position counter and return -1,
+ELSE advance the position counter"
+
+((!Start sampleAndHold: -1) +
+((1 - (!Start asLogicValue)) * (!SyllableGate nextIndexMod: 48 reset: !Start))
+
+Skips the first step
+
+----
+
+
+(!SyllableGate nextIndexMod: 49 reset: !Start) - 1
+
+This works ok with the !Start signal but when looping plays the first syllable twice.
+
+
