@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="96"
+   height="96"
+   viewBox="0 0 96 95.999998"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="rhythmenable.svg"
+   inkscape:export-filename="/Users/user/sync/git/ponumi/ponumi/images/rhythmenable.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
+  <defs
+     id="defs4">
+    <inkscape:perspective
+       id="perspective58"
+       inkscape:persp3d-origin="287.25 : 20.064538 : 1"
+       inkscape:vp_z="574.5 : 30.096807 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 30.096807 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 526.18109 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="744.09448 : 526.18109 : 1"
+       inkscape:persp3d-origin="372.04724 : 350.78739 : 1"
+       id="perspective2543" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="2.56"
+     inkscape:cx="-43.15625"
+     inkscape:cy="42.970572"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="true"
+     inkscape:window-width="1280"
+     inkscape:window-height="751"
+     inkscape:window-x="0"
+     inkscape:window-y="1"
+     inkscape:window-maximized="1"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     units="px"
+     objecttolerance="20"
+     showguides="true">
+    <inkscape:grid
+       type="xygrid"
+       id="grid4331"
+       spacingy="0.99999998"
+       empspacing="1" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-122.22852,-550.28125)">
+    <path
+       style="fill:#000000"
+       d="M 47.058594 18.976562 C 46.624831 18.9112 46.211514 19.132571 45.849609 19.806641 C 45.781509 22.264981 48.377345 23.659283 49.421875 25.720703 C 50.685555 28.188243 50.466011 31.191294 49.800781 33.808594 C 48.398471 37.067124 45.195569 38.994718 42.787109 41.455078 C 41.469823 42.562678 40.246632 44.265294 40.292969 46 L 53.162109 46 C 54.546955 44.338009 56.431629 43.046431 57.970703 41.548828 C 59.616453 39.975928 61.994501 37.774593 60.894531 35.257812 C 59.455111 32.492032 56.970431 30.448899 55.212891 27.917969 C 53.636311 26.295149 52.225083 24.51817 50.726562 22.84375 C 49.84979 21.951242 48.359881 19.172649 47.058594 18.976562 z M 53.162109 46 C 52.589116 46.687665 52.092466 47.43154 51.755859 48.291016 C 50.859129 50.707196 50.682077 53.375239 51.617188 55.818359 C 51.644738 55.880863 51.680107 55.938311 51.708984 56 L 85.5 56 L 85.5 46 L 53.162109 46 z M 51.708984 56 L 47.707031 56 C 49.000577 57.29779 49.917584 58.927166 51.181641 60.160156 C 49.540831 61.626166 47.217113 58.934768 45.164062 59.367188 C 43.269402 59.479848 40.916136 58.799914 39.347656 60.058594 C 38.033576 62.551404 38.654086 65.665713 39.916016 68.064453 C 40.445356 70.217283 41.564545 72.014679 42.515625 73.974609 C 43.693005 75.751679 44.452028 77.768131 46.298828 78.806641 C 46.442498 79.145831 47.143649 79.791806 47.318359 79.128906 C 46.356319 77.754136 45.971712 75.890582 45.726562 74.044922 C 44.796512 71.141192 45.160939 67.328959 48.005859 65.630859 C 50.309179 64.133259 52.792744 65.65355 54.964844 66.5625 C 56.442304 66.96194 59.512454 70.188156 59.990234 67.285156 C 59.172044 65.319516 57.624564 63.773527 56.208984 62.248047 C 54.813114 60.099314 52.800513 58.331748 51.708984 56 z M 47.707031 56 C 47.605729 55.898365 47.506724 55.794415 47.400391 55.697266 C 45.014041 53.168156 42.982404 50.355804 40.777344 47.677734 C 40.454954 47.127781 40.307999 46.562668 40.292969 46 L 10.5 46 L 10.5 56 L 47.707031 56 z "
+       transform="translate(122.22852,550.28125)"
+       id="path3546" />
+  </g>
+</svg>

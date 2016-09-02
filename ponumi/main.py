@@ -45,7 +45,7 @@ _default_osc_syllable_gate_address = '/keyboardgate'
 _default_osc_rhythm_address = '/rhythm'
 _default_osc_stop_address = '/stop'
 _default_osc_loop_address = '/loop'
-
+_default_osc_rhythmenable_address = '/rhythmenable'
 
 _osc_go_delay = 0.01     #seconds
 
@@ -70,8 +70,9 @@ _default_rhythm = make_rhythm(['1'])
 #touchosc discovered 169.254.9.91
 
 
-
-#Screens
+###############################################################
+# Screens
+###############################################################
 
 
 class RootScreen(BoxLayout):
@@ -96,7 +97,7 @@ class NameInputScreen(BoxLayout):
         top = BoxLayout(
             orientation='horizontal', 
             spacing=2, 
-            size_hint_y=0.5)
+            size_hint_y=0.6)
         
         top_left = BoxLayout(
             orientation='vertical', 
@@ -158,6 +159,15 @@ class NameInputScreen(BoxLayout):
             size=['48dp', '48dp'],
             up_image='images/loop-no-alpha.png',
             down_image='images/loop-no-alpha-glitch-inv.png'))
+
+        play_controls.add_widget(VCSToggleButton(
+            #text='rhythmenable',
+            osc_address=_default_osc_rhythmenable_address,
+            size_hint=[None, None],
+            size=['48dp', '48dp'],
+            up_image='images/rhythmenable-no-alpha.png',
+            down_image='images/rhythmenable-no-alpha-glitch-inv.png'))
+
 
         self.hear_button = IconToggleButton(
             #text='hear',
@@ -222,6 +232,7 @@ class NameInputScreen(BoxLayout):
                 self.generate_and_show_poem(_ancestor, _ancestor)
 
     def play_pressed(self, *args):
+
         if self.poem:
             play_poem_via_osc(self.poem)
 
@@ -405,8 +416,23 @@ class RhythmScreen(BoxLayout):
         self.add_widget(titleLayout)
 
 
-        self.poemDisplay = PoemDisplay(size_hint_y=0.35)
-        self.add_widget(self.poemDisplay)
+        topbox = BoxLayout(
+            orientation='horizontal', 
+            size_hint_y=0.35)
+
+        
+        topbox.add_widget(VCSSlider(
+            min=1,
+            max=48,
+            step=1,
+            show_value=True,
+            osc_address='/rhythm_length',
+            size_hint_x=0.2))
+        
+        self.poemDisplay = PoemDisplay()
+        topbox.add_widget(self.poemDisplay)
+
+        self.add_widget(topbox)
 
 
         poem_controls = BoxLayout(size_hint_y=0.1, spacing=15)
@@ -472,37 +498,23 @@ class VCSScreen(BoxLayout):
         super(VCSScreen, self).__init__(**kwargs)
 
         self.orientation='horizontal'
-        slider = VCSSlider('/vol')
-        #slider.bind(osc_value=self.vcs_slider_moved)
-        self.add_widget(slider)
 
-        slider = VCSSlider('/bpm')
-        #slider.bind(osc_value=self.vcs_slider_moved)
-        self.add_widget(slider)
+        self.add_widget(VCSSlider(
+            osc_address='/bpm',
+            min=10,
+            max=800,
+            step=10,
+            show_value=True))
 
-        self.add_widget(Label())
-
-        slider = VCSSlider('/poem_dur')
-        #slider.bind(osc_value=self.vcs_slider_moved)
-        self.add_widget(slider)
-
-        slider = VCSSlider('/poem_var')
-        #slider.bind(osc_value=self.vcs_slider_moved)
-        self.add_widget(slider)
+        self.add_widget(VCSSlider('/vol'))
+        self.add_widget(VCSSlider('/keyboard_volume'))
 
         self.add_widget(Label())
 
-        slider = VCSSlider('/key_dur')
-        #slider.bind(osc_value=self.vcs_slider_moved)
-        self.add_widget(slider)
-
-        slider = VCSSlider('/key_var')
-        #slider.bind(osc_value=self.vcs_slider_moved)
-        self.add_widget(slider)
+        self.add_widget(VCSSlider('/poem_var'))
 
 
-    #def vcs_slider_moved(self, instance, value):
-    #    send_osc_message(value['osc_address'], [value['value']])
+
 
 
 ###############################################################
@@ -596,27 +608,46 @@ class VCSButton(IconButton):
 class VCSSlider(BoxLayout):
 
 
-    def __init__(self, osc_address, **kwargs):
+    def __init__(self, osc_address, show_value=False, 
+        min=0, max=100, step=1, **kwargs):
+
         super(VCSSlider, self).__init__(**kwargs)
 
         self.osc_address = osc_address
+        self.show_value = show_value
 
         self.orientation = 'vertical'
         self.slider = Slider(
             orientation='vertical',
-            size_hint_y=0.8)
+            size_hint_y=0.8,
+            min=min,
+            max=max,
+            step=step)
 
         self.slider.bind(value=self.slider_moved)
 
         label = Label(
             text=self.osc_address.replace('_', ' ').lstrip('/'),
             size_hint_y=0.2)
-            
+        
+        if self.show_value:
+            self.value_label = Label(
+                size_hint_y=0.1,
+                text=str(min))
+            self.add_widget(self.value_label)
+
         self.add_widget(self.slider)
         self.add_widget(label)
 
     def slider_moved(self, instance, value):
         send_osc_message(self.osc_address, [self.slider.value_normalized])
+        if self.show_value:
+            value_string = str(self.slider.value)
+            if value_string.endswith('.0'):
+                value_string = value_string[:-2]
+            self.value_label.text = value_string
+
+
 
 
 
@@ -837,7 +868,8 @@ class EntryBox(BoxLayout):
         self.textWidget = Label(
             text='', 
             size_hint_x=13, 
-            font_size='30sp',
+            font_size='20sp',
+            bold=True,
             on_touch_up=self.selected)
 
         textWidgetBorder = BoxLayout(padding=[10,0])
