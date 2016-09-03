@@ -30,7 +30,7 @@ then I had to comment out the following line near the bottom of setup.py:
 import sys
 import random
 import collections
-
+import copy
 
 
 POEM_ROOT_LENGTH = 8
@@ -233,6 +233,21 @@ class Poem:
             poem_str = poem_str + line_str.strip() + "\n"
 
         return poem_str.strip()
+
+    def copy(self):
+        """
+        Returns a copy of the Poem
+        """
+
+        return Poem(
+            copy.deepcopy(self.syllables), 
+            root_name=self.root_name, 
+            ancestors=copy.deepcopy(self.ancestors),
+            root=copy.deepcopy(self.root), 
+            rhyming_scheme=copy.deepcopy(self.rhyming_scheme))
+
+
+
 
 
 def copy_list_shape(item_list, shape_list):

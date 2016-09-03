@@ -17,6 +17,12 @@
 
         ActionToggleButton:
             group: 'screens'
+        	icon: 'images/rhythm-glitch-inv.png'
+        	background_down: 'images/rhythm-glitch.png'
+        	on_release: root.rhythm_pressed()
+
+        ActionToggleButton:
+            group: 'screens'
         	icon: 'images/manual-glitch-inv.png'
         	background_down: 'images/manual-glitch.png'
         	on_release: root.keyboard_pressed()
@@ -26,12 +32,6 @@
         	icon: 'images/laser-glitch-inv.png'
         	background_down: 'images/laser-glitch.png'
         	on_release: root.manual_pressed()
-
-        ActionToggleButton:
-            group: 'screens'
-        	icon: 'images/rhythm-glitch-inv.png'
-        	background_down: 'images/rhythm-glitch.png'
-        	on_release: root.rhythm_pressed()
 
         ActionToggleButton:
             group: 'screens'
@@ -59,15 +59,9 @@
 <ConfigScreen>:
 	osc_ip_address: osc_ip_address
 	osc_port: osc_port
-	osc_data_address: osc_data_address
-	osc_go_address: osc_go_address
-	osc_syllable_address: osc_syllable_address
-	osc_syllable_gate_address: osc_syllable_gate_address
-	osc_rhythm_address: osc_rhythm_address
-
+	auto_generate_rhythm: auto_generate_rhythm
 
 	orientation: 'vertical'
-
 
 	GridLayout:
 		cols: 2
@@ -88,39 +82,10 @@
 			multiline: False
 
 		Label:
-			text: 'osc data address'
-		TextInput:
-			id: osc_data_address
-			text: app.osc_data_address
-			multiline: False
-
-		Label:
-			text: 'osc go address'
-		TextInput:
-			id: osc_go_address
-			text: app.osc_go_address
-			multiline: False
-
-		Label:
-			text: 'osc syllable address'
-		TextInput:
-			id: osc_syllable_address
-			text: app.osc_syllable_address
-			multiline: False
-
-		Label:
-			text: 'osc syllable gate address'
-		TextInput:
-			id: osc_syllable_gate_address
-			text: app.osc_syllable_gate_address
-			multiline: False
-
-		Label:
-			text: 'osc rhythm address'
-		TextInput:
-			id: osc_rhythm_address
-			text: app.osc_rhythm_address
-			multiline: False
+			text: 'auto generate rhythm'
+		ToggleButton:
+			id: auto_generate_rhythm
+			text: 'enable'
 
 
 
