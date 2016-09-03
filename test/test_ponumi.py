@@ -8,12 +8,13 @@ import os
 
 import midi
 
-import ponumi
-import ponumi_midi
-import ponumi_osc
-from ponumi import a as a
-from ponumi import o as o
-from ponumi import x as x
+
+from ponumi import ponumi_midi
+from ponumi import ponumi_osc
+from ponumi import ponumi as ponumi
+from ponumi.ponumi import a as a
+from ponumi.ponumi import o as o
+from ponumi.ponumi import x as x
 
 
 class Test(unittest.TestCase):
@@ -86,8 +87,6 @@ class Test(unittest.TestCase):
             if isinstance(event, midi.NoteOnEvent):
                 #if the note is a note_on event, get its note number
                 notes.append(event.data[0])
-
-        print "notes", notes
 
         self.assertTrue(notes == [59, 55, 48, 59, 55, 48, 59, 55, 48])
         os.remove(test_filename)    #delete the test file
@@ -271,6 +270,115 @@ class Test(unittest.TestCase):
         consonant, vowel = ponumi.split_syllable("n")
         self.assertTrue(consonant == "n")
         self.assertTrue(vowel == "")
+
+    # def test_poem_append(self):
+        
+    #     poem = ponumi.Poem([['a', 'e', 'i']])
+    #     expected_syllables = [['a', 'e', 'i', 'o']]
+
+
+    #     poem.append('o')
+    #     print 'syllables:', poem.syllables
+    #     print 'expected:', expected_syllables
+    #     self.assertTrue(poem.syllables == expected_syllables)
+
+    def test_copy_list_shape(self):
+
+        in_list = ['a', 'e', 'i', 'o', 'u', 'y']
+        shape_list = [[1,1,1],[None,None,None]]
+        expected_list = [
+            ['a', 'e', 'i'], 
+            ['o', 'u', 'y']]
+
+        out_list, remainder = ponumi.copy_list_shape(in_list, shape_list)
+        self.assertTrue(out_list == expected_list)
+
+        #test too many items
+        in_list = ['a', 'e', 'i', 'o', 'u', 'y']
+        shape_list = [[1,1],[1,1]]
+        expected_list = [
+            ['a', 'e'], 
+            ['i', 'o']]
+
+        out_list, remainder = ponumi.copy_list_shape(in_list, shape_list)
+        self.assertTrue(out_list == expected_list)
+
+
+        #test too few items
+        in_list = ['a', 'e', 'i', 'o', 'u', 'y']
+        shape_list = [[1,1,1,1],[1,1,1,1]]
+        expected_list = [
+            ['a', 'e', 'i', 'o'], 
+            ['u', 'y']]
+
+        out_list, remainder = ponumi.copy_list_shape(in_list, shape_list)
+        self.assertTrue(out_list == expected_list)
+
+
+    def test_poem_append(self):
+
+        #test full poem, nothing should be appended
+        in_syllables = [
+            ['a', 'e', 'i'],
+            ['o', 'u', 'yu']]
+
+        rhyming_scheme = (("a", "o", "x"),
+                          ("x", "a", "o"))
+
+        expected_syllables = [
+            ['a', 'e', 'i'],
+            ['o', 'u', 'yu']]
+
+        poem = ponumi.Poem(in_syllables, rhyming_scheme=rhyming_scheme)
+        poem.append('zu')
+
+        self.assertTrue(poem.syllables == expected_syllables)
+
+        #test poem with space
+        in_syllables = [
+            ['a', 'e', 'i'],
+            ['o', 'u']]
+
+        rhyming_scheme = (("a", "o", "x"),
+                          ("x", "a", "o"))
+
+        expected_syllables = [
+            ['a', 'e', 'i'],
+            ['o', 'u', 'zu']]
+
+        poem = ponumi.Poem(in_syllables, rhyming_scheme=rhyming_scheme)
+        poem.append('zu')
+
+        self.assertTrue(poem.syllables == expected_syllables)
+
+
+    def test_poem_pop(self):
+        #test full poem
+        in_syllables = [
+            ['a', 'e', 'i'],
+            ['o', 'u', 'yu']]
+
+        expected_syllables = [
+            ['a', 'e', 'i'],
+            ['o', 'u']]
+
+        poem = ponumi.Poem(in_syllables)
+        poem.pop()
+
+        self.assertTrue(poem.syllables == expected_syllables)
+
+        #test sub-list boundary
+        in_syllables = [
+            ['a', 'e', 'i'],
+            ['o']]
+
+        expected_syllables = [
+            ['a', 'e', 'i']]
+
+        poem = ponumi.Poem(in_syllables)
+        poem.pop()
+
+        self.assertTrue(poem.syllables == expected_syllables)
 
 
 

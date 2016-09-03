@@ -4,7 +4,8 @@ from ponumi import flatten
 from ponumi import load_poem_file
 from ponumi import poem_list_to_notes
 
-from miditime.MIDITime import MIDITime
+#from miditime.MIDITime import MIDITime
+from miditime.miditime import MIDITime
 
 _default_tempo = 120    #BPM
 

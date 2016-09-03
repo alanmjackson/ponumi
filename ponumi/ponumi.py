@@ -196,6 +196,30 @@ class Poem:
         self.root = root
         self.rhyming_scheme = rhyming_scheme
     
+    def __len__(self):
+        return len(flatten(self.syllables))
+
+
+    def append(self, syllable):
+
+        if self.rhyming_scheme:
+            rhyming_scheme = self.rhyming_scheme
+        else:
+            rhyming_scheme = RHYMING_SCHEME
+
+        #only bother if there's space left in the poem to append to
+        if len(flatten(self.syllables)) < len(flatten(rhyming_scheme)):
+            syllable_list = flatten(self.syllables)
+            syllable_list.append(syllable)
+            self.syllables, remainder = copy_list_shape(syllable_list, rhyming_scheme)
+
+    def pop(self):
+
+        syllable_list = flatten(self.syllables)
+        if len(syllable_list) > 0:
+            syllable_list.pop()
+        self.syllables, remainder = copy_list_shape(syllable_list, self.syllables)
+
     def to_string(self):
         """
         Create a string representation of a poem. 
@@ -209,6 +233,43 @@ class Poem:
             poem_str = poem_str + line_str.strip() + "\n"
 
         return poem_str.strip()
+
+
+def copy_list_shape(item_list, shape_list):
+    """
+    Takes a list of items and folds it into the same shape as the given shape_list.
+    This is useful for turning a flat list of syllables into a poem. 
+
+    For instance with:
+
+    item_list = ['a','e','i','o']
+    shape_list = [[None, None], [None, None]]
+
+    will return:
+
+    [['a', 'e'], ['i', 'o']]
+
+    """
+
+
+    flat_item_list = flatten(item_list)
+    out_list = []
+
+    for element in shape_list:
+        if isinstance(element, collections.Iterable) and not isinstance(element, basestring):
+            sub_list, remaining_items = copy_list_shape(flat_item_list, element)
+            if len(sub_list) > 0:
+                out_list.append(sub_list)
+            flat_item_list = remaining_items
+        else:
+            if len(flat_item_list) > 0:
+                out_list.extend(flat_item_list[:1])
+                flat_item_list.pop(0)
+            else:
+                break
+
+    return (out_list, flat_item_list)
+
 
 
 def note_table_to_string():
@@ -271,12 +332,14 @@ def flatten(in_list):
 
     [[1,2], [3,4]]  ->   [1, 2, 3, 4]
     """
+    flattened_list = []
     for element in in_list:
         if isinstance(element, collections.Iterable) and not isinstance(element, basestring):
-            for sub in flatten(element):
-                yield sub
+            flattened_list = flattened_list + flatten(element)
         else:
-            yield element
+            flattened_list.append(element)
+
+    return flattened_list
 
 
 def create_syllable_list(syllable_lists, size):
@@ -525,7 +588,7 @@ def split_syllable(syllable):
     vowel = ""
     consonant = syllable
 
-    vowels = syllable_table[0]
+    vowels = syllable_right_roots
 
     for v in vowels:
         i = syllable.rfind(v)

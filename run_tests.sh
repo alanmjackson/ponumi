@@ -1,3 +1,5 @@
 #!/bin/bash
 
-export PYTHONPATH=$PYTHONPATH:'/home/mcneil/sync/ponumi/ponumi/'; python test/test_ponumi.py
+#export PYTHONPATH=$PYTHONPATH:'/home/mcneil/sync/ponumi/ponumi/'; python test/test_ponumi.py
+
+python -m unittest discover
