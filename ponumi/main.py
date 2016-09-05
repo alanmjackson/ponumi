@@ -401,131 +401,14 @@ class KeyboardScreen(BoxLayout):
 
 
 
+
+
 class RhythmScreen(BoxLayout):
 
     poem = ObjectProperty(None)
 
     def __init__(self, **kwargs):
         super(RhythmScreen, self).__init__(**kwargs)
-
-        self.orientation = 'vertical'
-        self.spacing = 10
-
-        titleLayout = BoxLayout(size_hint_y=0.05)
-
-        self.poemTitle = Label(size_hint_x=0.9, font_size='24sp')
-
-        titleLayout.add_widget(self.poemTitle)
-        self.add_widget(titleLayout)
-
-
-        topbox = BoxLayout(
-            orientation='horizontal', 
-            size_hint_y=0.4)
-
-        
-        self.rhythm_length_slider = VCSSlider(
-            min=1,
-            max=48,
-            step=1,
-            show_value=True,
-            osc_address='/rhythm_length',
-            size_hint_x=0.2)
-
-        topbox.add_widget(self.rhythm_length_slider)
-
-        self.poemDisplay = PoemDisplay()
-        topbox.add_widget(self.poemDisplay)
-
-        self.add_widget(topbox)
-
-
-        poem_controls = BoxLayout(size_hint_y=0.1, spacing=2)
-
-        self.entryBox = EntryBox(
-            size_hint_x=14,
-            on_delete=self.delete_pressed,
-            on_clear=self.clear_pressed)
-
-        poem_controls.add_widget(self.entryBox)
-
-        poem_controls.add_widget(IconButton(
-            #text='enter',
-            size_hint=[None, None],
-            size=['48dp', '48dp'],
-            up_image='images/ret-no-alpha.png',
-            down_image='images/ret-no-alpha-glitch-inv.png',
-            on_release=self.enter_pressed))
-
-        self.destination_button = IconToggleButton(
-            #text='destination',
-            size_hint=[None, None],
-            size=['48dp', '48dp'],
-            up_image='images/poem-no-alpha.png',
-            down_image='images/poem-no-alpha-glitch-inv.png')
-
-        poem_controls.add_widget(self.destination_button)
-
-        self.add_widget(poem_controls)
-
-        self.add_widget(RhythmKeyboard(
-            size_hint_y=0.55, 
-            on_keyboard_up=self.keyboard_btn_released))
-
-
-    def refresh_form(self, *args):
-        app = kivy.app.App.get_running_app()
-        self.poem = app.rhythm
-
-    def keyboard_btn_released(self, *args):
-        key = args[1]
-        if self.destination_button.state == 'down':
-            self.poem.append(key.value)
-            self.on_poem(None, None)
-        else:
-            self.entryBox.append_syllable(key.value)
-
-    def delete_pressed(self, *args):
-        if self.destination_button.state == 'down':
-            self.poem.pop()
-            self.on_poem(None, None)
-            return True
-
-    def clear_pressed(self, *args):
-        if self.destination_button.state == 'down':
-            self.poem = ponumi.Poem([])
-            return True
-
-    def enter_pressed(self, *args):
-
-        if len(self.entryBox.syllables) > 0:
-            self.poem = make_rhythm(self.entryBox.syllables)
-
-            #clear the entry box
-            self.entryBox.syllables = []
-        else:
-            if self.poem and self.poem.root_name and len(self.poem.root_name) > 0:
-                self.poem = make_rhythm(self.poem.root_name)
-            else:
-                self.poem = make_rhythm(['1'])
-
-    def on_poem(self, instance, value):
-        self.poemDisplay.syllables = self.poem.syllables
-        if self.poem.root_name:
-            self.poemTitle.text = ' '.join(self.poem.root_name)
-        else:
-            self.poemTitle.text = ''
-
-        app = kivy.app.App.get_running_app()
-        app.rhythm = self.poem
-
-
-class RhythmScreen2(BoxLayout):
-
-    poem = ObjectProperty(None)
-
-    def __init__(self, **kwargs):
-        super(RhythmScreen2, self).__init__(**kwargs)
 
         self.orientation = 'vertical'
         self.spacing = 10
@@ -833,10 +716,6 @@ class NavBar(ActionBar):
 
     def rhythm_pressed(self, *args):
         kivy.app.App.get_running_app().screen_manager.current = 'rhythm_screen'
-        kivy.app.App.get_running_app().screen_manager.current_screen.children[0].refresh_form()
-
-    def rhythm2_pressed(self, *args):
-        kivy.app.App.get_running_app().screen_manager.current = 'rhythm_screen2'
         kivy.app.App.get_running_app().screen_manager.current_screen.children[0].refresh_form()
 
     def vcs_pressed(self, *args):
@@ -1393,9 +1272,6 @@ class PonumiPerformerScreenManager(ScreenManager):
         rhythm_screen = Screen(name='rhythm_screen')
         rhythm_screen.add_widget(RhythmScreen())
 
-        rhythm_screen2 = Screen(name='rhythm_screen2')
-        rhythm_screen2.add_widget(RhythmScreen2())
-
         vcs_screen = Screen(name='vcs_screen')
         vcs_screen.add_widget(VCSScreen())
 
@@ -1406,7 +1282,6 @@ class PonumiPerformerScreenManager(ScreenManager):
         self.add_widget(manual_screen)
         self.add_widget(keyboard_screen)
         self.add_widget(rhythm_screen)
-        self.add_widget(rhythm_screen2)
         self.add_widget(vcs_screen)
         self.add_widget(config_screen)
 
