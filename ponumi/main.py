@@ -50,6 +50,7 @@ osc_rhythm_address = '/rhythm'
 osc_stop_address = '/stop'
 osc_loop_address = '/loop'
 osc_rhythmenable_address = '/rhythmenable'
+osc_eolpause_address = '/pause'
 
 _osc_go_delay = 0.01     #seconds
 
@@ -101,13 +102,13 @@ class NameInputScreen(BoxLayout):
         top = BoxLayout(
             orientation='horizontal', 
             spacing=2, 
-            size_hint_y=0.6)
+            size_hint_y=0.5)
         
         top_left = BoxLayout(
             orientation='vertical', 
             size_hint_x=0.9)
 
-        titleLayout = BoxLayout(size_hint_y=0.05)
+        titleLayout = BoxLayout(size_hint_y=0.05, padding=[0,30,0,0])
 
         self.poemTitle = Label(size_hint_x=0.9, font_size='24sp')
 
@@ -129,49 +130,16 @@ class NameInputScreen(BoxLayout):
             size_hint=[None, None],
             size=['48dp', '48dp'],
             up_image='images/ret-no-alpha.png',
-            down_image='images/ret-no-alpha-glitch-inv.png',
+            down_image='images/ret-no-alpha-glitch-inv-red.png',
             on_release=self.enter_pressed))
 
-
-
-        play_controls = BoxLayout(
-            orientation='vertical', 
-            size_hint_x=None,
-            size=['48dp', 0],
-            spacing=2)
-
-        play_controls.add_widget(IconButton(
+        poem_controls.add_widget(IconButton(
             #text='play',
             size_hint=[None, None],
             size=['48dp', '48dp'],
-            up_image='images/play-no-alpha.png',
-            down_image='images/play-no-alpha-glitch-inv.png', 
-            on_release=self.play_pressed))
-
-        play_controls.add_widget(VCSButton(
-            #text='stop',
-            osc_address=osc_stop_address,
-            size_hint=[None, None],
-            size=['48dp', '48dp'],
-            up_image='images/stop-no-alpha.png',
-            down_image='images/stop-no-alpha-glitch-inv.png'))
-
-        play_controls.add_widget(VCSToggleButton(
-            #text='loop',
-            osc_address=osc_loop_address,
-            size_hint=[None, None],
-            size=['48dp', '48dp'],
-            up_image='images/loop-no-alpha.png',
-            down_image='images/loop-no-alpha-glitch-inv.png'))
-
-        play_controls.add_widget(VCSToggleButton(
-            #text='rhythmenable',
-            osc_address=osc_rhythmenable_address,
-            size_hint=[None, None],
-            size=['48dp', '48dp'],
-            up_image='images/rhythmenable-no-alpha.png',
-            down_image='images/rhythmenable-no-alpha-glitch-inv.png'))
-
+            up_image='images/send-no-alpha.png',
+            down_image='images/send-no-alpha-glitch-inv-red.png', 
+            on_release=self.send_pressed))
 
         self.hear_button = IconToggleButton(
             #text='hear',
@@ -180,17 +148,51 @@ class NameInputScreen(BoxLayout):
             up_image='images/hear-no-alpha.png',
             down_image='images/hear-no-alpha-glitch-inv.png')
 
-        play_controls.add_widget(self.hear_button)
+        poem_controls.add_widget(self.hear_button)
+
+
+
+        # play_controls = BoxLayout(
+        #     orientation='vertical', 
+        #     size_hint_x=None,
+        #     size=['48dp', 0],
+        #     spacing=2)
+
+
+        # play_controls.add_widget(VCSButton(
+        #     #text='stop',
+        #     osc_address=osc_stop_address,
+        #     size_hint=[None, None],
+        #     size=['48dp', '48dp'],
+        #     up_image='images/stop-no-alpha.png',
+        #     down_image='images/stop-no-alpha-glitch-inv-red.png'))
+
+        # play_controls.add_widget(VCSToggleButton(
+        #     #text='loop',
+        #     osc_address=osc_loop_address,
+        #     size_hint=[None, None],
+        #     size=['48dp', '48dp'],
+        #     up_image='images/loop-no-alpha.png',
+        #     down_image='images/loop-no-alpha-glitch-inv.png'))
+
+        # play_controls.add_widget(VCSToggleButton(
+        #     #text='rhythmenable',
+        #     osc_address=osc_rhythmenable_address,
+        #     size_hint=[None, None],
+        #     size=['48dp', '48dp'],
+        #     up_image='images/rhythmenable-no-alpha.png',
+        #     down_image='images/rhythmenable-no-alpha-glitch-inv.png'))
+
 
 
         top_left.add_widget(poem_controls)
-
         top.add_widget(top_left)
-        top.add_widget(play_controls)
+        
+        # top.add_widget(play_controls)
 
         self.add_widget(top)
         self.add_widget(SyllableKeyboard(
-            size_hint_y=0.7, 
+            size_hint_y=0.5, 
             on_keyboard_down=self.syllable_btn_pressed,
             on_keyboard_up=self.syllable_btn_released))
 
@@ -245,7 +247,7 @@ class NameInputScreen(BoxLayout):
 
 
 
-    def play_pressed(self, *args):
+    def send_pressed(self, *args):
 
         if self.poem:
             play_poem_via_osc(self.poem)
@@ -306,7 +308,7 @@ class ManualScreen(BoxLayout):
             size_hint=[None, None],
             size=['48dp', '48dp'],
             up_image='images/del-no-alpha.png',
-            down_image='images/del-no-alpha-glitch-inv.png',
+            down_image='images/del-no-alpha-glitch-inv-red.png',
             on_release=self.del_pressed))
 
         controls.add_widget(IconButton(
@@ -314,16 +316,16 @@ class ManualScreen(BoxLayout):
             size_hint=[None, None],
             size=['48dp', '48dp'],
             up_image='images/clear-no-alpha.png',
-            down_image='images/clear-no-alpha-glitch-inv.png',
+            down_image='images/clear-no-alpha-glitch-inv-red.png',
             on_release=self.clear_pressed))
 
         controls.add_widget(IconButton(
             #text='play',
             size_hint=[None, None],
             size=['48dp', '48dp'],
-            up_image='images/play-no-alpha.png',
-            down_image='images/play-no-alpha-glitch-inv.png', 
-            on_release=self.play_pressed))
+            up_image='images/send-no-alpha.png',
+            down_image='images/send-no-alpha-glitch-inv-red.png', 
+            on_release=self.send_pressed))
 
         self.hear_button = IconToggleButton(
             #text='hear',
@@ -352,7 +354,7 @@ class ManualScreen(BoxLayout):
         self.syllables = []
 
 
-    def play_pressed(self, *args):
+    def send_pressed(self, *args):
         #pad the end of the poem with silence
         syllables = self.syllables + ['-'] * (_poem_length - len(self.syllables))
         poem = ponumi.Poem(syllables)
@@ -419,7 +421,7 @@ class RhythmScreen(BoxLayout):
 
         topbox = BoxLayout(
             orientation='horizontal', 
-            size_hint_y=0.35)
+            size_hint_y=0.4)
 
         
         self.rhythm_length_slider = VCSSlider(
@@ -467,7 +469,7 @@ class RhythmScreen(BoxLayout):
         self.add_widget(poem_controls)
 
         self.add_widget(RhythmKeyboard(
-            size_hint_y=0.7, 
+            size_hint_y=0.55, 
             on_keyboard_up=self.keyboard_btn_released))
 
 
@@ -518,6 +520,104 @@ class RhythmScreen(BoxLayout):
         app.rhythm = self.poem
 
 
+class RhythmScreen2(BoxLayout):
+
+    poem = ObjectProperty(None)
+
+    def __init__(self, **kwargs):
+        super(RhythmScreen2, self).__init__(**kwargs)
+
+        self.orientation = 'vertical'
+        self.spacing = 10
+
+        titleLayout = BoxLayout(size_hint_y=0.05)
+
+        self.poemTitle = Label(size_hint_x=0.9, font_size='24sp')
+
+        titleLayout.add_widget(self.poemTitle)
+        self.add_widget(titleLayout)
+
+
+        topbox = BoxLayout(
+            orientation='horizontal', 
+            size_hint_y=0.4)
+
+        
+        self.rhythm_length_slider = VCSSlider(
+            min=1,
+            max=48,
+            step=1,
+            show_value=True,
+            osc_address='/rhythm_length',
+            size_hint_x=0.2)
+
+        topbox.add_widget(self.rhythm_length_slider)
+
+        self.rhythm_display = RhythmDisplay(
+            on_button_pressed=self.rhythm_btn_pressed)
+
+        topbox.add_widget(self.rhythm_display)
+
+        self.add_widget(topbox)
+
+
+        poem_controls = BoxLayout(size_hint_y=0.1, spacing=2)
+
+        self.entryBox = EntryBox(
+            size_hint_x=14)
+
+        poem_controls.add_widget(self.entryBox)
+
+        poem_controls.add_widget(IconButton(
+            #text='enter',
+            size_hint=[None, None],
+            size=['48dp', '48dp'],
+            up_image='images/ret-no-alpha.png',
+            down_image='images/ret-no-alpha-glitch-inv.png',
+            on_release=self.enter_pressed))
+
+        self.add_widget(poem_controls)
+
+        self.add_widget(RhythmKeyboard(
+            size_hint_y=0.55, 
+            on_keyboard_up=self.keyboard_btn_released))
+
+
+    def refresh_form(self, *args):
+        app = kivy.app.App.get_running_app()
+        self.poem = app.rhythm
+
+    def keyboard_btn_released(self, *args):
+        key = args[1]
+        self.entryBox.append_syllable(key.value)
+
+    def rhythm_btn_pressed(self, *args):
+        self.poem = ponumi.Poem(self.rhythm_display.syllables)
+
+
+    def enter_pressed(self, *args):
+
+        if len(self.entryBox.syllables) > 0:
+            self.poem = make_rhythm(self.entryBox.syllables)
+
+            #clear the entry box
+            self.entryBox.syllables = []
+        else:
+            if self.poem and self.poem.root_name and len(self.poem.root_name) > 0:
+                self.poem = make_rhythm(self.poem.root_name)
+            else:
+                self.poem = make_rhythm(['1'])
+
+    def on_poem(self, instance, value):
+        self.rhythm_display.syllables = self.poem.syllables
+        if self.poem.root_name:
+            self.poemTitle.text = ' '.join(self.poem.root_name)
+        else:
+            self.poemTitle.text = ''
+
+        app = kivy.app.App.get_running_app()
+        app.rhythm = self.poem
+
 
 class VCSScreen(BoxLayout):
 
@@ -536,7 +636,37 @@ class VCSScreen(BoxLayout):
         self.add_widget(VCSSlider('/vol'))
         self.add_widget(VCSSlider('/keyboard_volume'))
 
-        self.add_widget(Label())
+        buttons = BoxLayout(
+            orientation='vertical',
+            spacing=5,
+            padding=[0,50])
+
+        buttons.add_widget(VCSButton(
+            osc_address=osc_go_address,
+            up_image='images/play-no-alpha.png',
+            down_image='images/play-no-alpha-glitch-inv-red.png'))
+
+        buttons.add_widget(VCSButton(
+            osc_address=osc_stop_address,
+            up_image='images/stop-no-alpha.png',
+            down_image='images/stop-no-alpha-glitch-inv-red.png'))
+        
+        buttons.add_widget(VCSToggleButton(
+            osc_address=osc_loop_address,
+            up_image='images/loop-no-alpha.png',
+            down_image='images/loop-no-alpha-glitch-inv.png'))
+        
+        buttons.add_widget(VCSToggleButton(
+            osc_address=osc_rhythmenable_address,
+            up_image='images/rhythmenable-no-alpha.png',
+            down_image='images/rhythmenable-no-alpha-glitch-inv.png'))
+        
+        buttons.add_widget(VCSToggleButton(
+            osc_address=osc_eolpause_address,
+            up_image='images/eolpause-no-alpha.png',
+            down_image='images/eolpause-no-alpha-glitch-inv.png'))
+
+        self.add_widget(buttons)
 
         self.add_widget(VCSSlider('/poem_var'))
 
@@ -705,6 +835,10 @@ class NavBar(ActionBar):
         kivy.app.App.get_running_app().screen_manager.current = 'rhythm_screen'
         kivy.app.App.get_running_app().screen_manager.current_screen.children[0].refresh_form()
 
+    def rhythm2_pressed(self, *args):
+        kivy.app.App.get_running_app().screen_manager.current = 'rhythm_screen2'
+        kivy.app.App.get_running_app().screen_manager.current_screen.children[0].refresh_form()
+
     def vcs_pressed(self, *args):
         kivy.app.App.get_running_app().screen_manager.current = 'vcs_screen'
 
@@ -736,7 +870,7 @@ class PoemDisplay(GridLayout):
             for j in range(12):
                 syllable_widget = Label(
                     text='', 
-                    font_size='20sp', 
+                    font_size='24sp', 
                     on_touch_up=self.selected)
                 
                 display_row.append(syllable_widget)
@@ -783,6 +917,83 @@ class PoemDisplay(GridLayout):
                     self.display_syllables[i][j].text = self.syllables[i][j]
                 else:
                     self.display_syllables[i][j].text = ''
+
+
+class RhythmDisplay(GridLayout):
+
+    syllables = ListProperty([])     #expects a 4 x 12 array of syllables
+
+    def __init__(self, **kwargs):
+        self.register_event_type('on_button_pressed')
+        super(RhythmDisplay, self).__init__(**kwargs)
+
+        self.cols = 12
+        self.padding = [100, 20]
+        self.spacing = 2
+
+        self.display_syllables = []
+
+
+        for i in range(4):
+            display_row = []
+            for j in range(12):
+                syllable_widget = VCSToggleButton(
+                    osc_address=osc_rhythm_address + '//' + str((i * 12) + j + 1),
+                    down_image='images/stop-no-alpha.png',
+                    up_image='images/stop-no-alpha-glitch-inv.png')
+
+                #why can't I bind to on_state? Why doesn't that work?
+                syllable_widget.bind(on_release=self.button_pressed)
+                
+                display_row.append(syllable_widget)
+                self.add_widget(syllable_widget)
+
+            self.display_syllables.append(display_row)
+
+
+    def button_pressed(self, *args):
+        syllables = [[None for x in range(12)] for y in range(4)] 
+        for i in range(4):
+            for j in range(12):
+                if self.display_syllables[i][j].state == 'down':
+                    syllables[i][j] = '1'
+                else:
+                    syllables[i][j] = '0'
+
+        self.syllables = syllables
+
+        self.dispatch('on_button_pressed', *args)
+
+
+    def on_button_pressed(self, *args):
+        pass
+
+    def on_syllables(self, instance, value):
+        #if syllables is a 1D array turn it into a 2D array
+        if len(self.syllables) > 0:
+            if not isinstance(self.syllables[0], list):
+                syllable_array = [['' for x in range(12)] for y in range(4)]
+                for i in range(min(_poem_length, len(self.syllables))):
+                    syllable_array[int(i/12)][i % 12] = self.syllables[i]
+
+                self.syllables = syllable_array
+
+
+        #truncate array to 4 x 12
+        truncated_syllables = self.syllables[:4]
+        for k in range(len(truncated_syllables)):
+            truncated_syllables[k] = truncated_syllables[k][:12]
+        self.syllables = truncated_syllables
+
+        for i in range(4):
+            for j in range(12):
+                if i < len(self.syllables) and \
+                    j < len(self.syllables[i]) and \
+                    self.syllables[i][j] == '1':
+                    
+                    self.display_syllables[i][j].state = 'down'
+                else:
+                    self.display_syllables[i][j].state = 'normal'
 
 
 
@@ -932,7 +1143,7 @@ class EntryBox(BoxLayout):
             size=['48dp', '48dp'],
             background_color=[127,127,127,1.0],
             up_image='images/del-no-alpha.png',
-            down_image='images/del-no-alpha-glitch-inv.png', 
+            down_image='images/del-no-alpha-glitch-inv-red.png', 
             on_release=self.delete))
 
         self.add_widget(IconButton(
@@ -942,7 +1153,7 @@ class EntryBox(BoxLayout):
             size=['48dp', '48dp'],
             background_color=[127,127,127,1.0],
             up_image='images/clear-no-alpha.png',
-            down_image='images/clear-no-alpha-glitch-inv.png', 
+            down_image='images/clear-no-alpha-glitch-inv-red.png', 
             on_release=self.clear))
 
 
@@ -1182,6 +1393,9 @@ class PonumiPerformerScreenManager(ScreenManager):
         rhythm_screen = Screen(name='rhythm_screen')
         rhythm_screen.add_widget(RhythmScreen())
 
+        rhythm_screen2 = Screen(name='rhythm_screen2')
+        rhythm_screen2.add_widget(RhythmScreen2())
+
         vcs_screen = Screen(name='vcs_screen')
         vcs_screen.add_widget(VCSScreen())
 
@@ -1192,6 +1406,7 @@ class PonumiPerformerScreenManager(ScreenManager):
         self.add_widget(manual_screen)
         self.add_widget(keyboard_screen)
         self.add_widget(rhythm_screen)
+        self.add_widget(rhythm_screen2)
         self.add_widget(vcs_screen)
         self.add_widget(config_screen)
 

@@ -247,6 +247,26 @@ class Poem:
             rhyming_scheme=copy.deepcopy(self.rhyming_scheme))
 
 
+###########################################################
+# Factor out the following as generically useful functions
+###########################################################
+
+def flatten(in_list):
+    """
+    Flattens lists so that a list of lists becomes just a flat list of all the 
+    items of all the contained lists.
+    For example:
+
+    [[1,2], [3,4]]  ->   [1, 2, 3, 4]
+    """
+    flattened_list = []
+    for element in in_list:
+        if isinstance(element, collections.Iterable) and not isinstance(element, basestring):
+            flattened_list = flattened_list + flatten(element)
+        else:
+            flattened_list.append(element)
+
+    return flattened_list
 
 
 
@@ -284,6 +304,10 @@ def copy_list_shape(item_list, shape_list):
                 break
 
     return (out_list, flat_item_list)
+
+###########################################################
+# End
+###########################################################
 
 
 
@@ -337,24 +361,6 @@ def load_rhyming_scheme(filename):
         lines.append(tuple(line.split()))
 
     return tuple(lines)
-
-
-def flatten(in_list):
-    """
-    Flattens lists so that a list of lists becomes just a flat list of all the 
-    items of all the contained lists.
-    For example:
-
-    [[1,2], [3,4]]  ->   [1, 2, 3, 4]
-    """
-    flattened_list = []
-    for element in in_list:
-        if isinstance(element, collections.Iterable) and not isinstance(element, basestring):
-            flattened_list = flattened_list + flatten(element)
-        else:
-            flattened_list.append(element)
-
-    return flattened_list
 
 
 def create_syllable_list(syllable_lists, size):
