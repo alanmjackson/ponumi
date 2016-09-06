@@ -115,7 +115,7 @@ class NameInputScreen(BoxLayout):
 
         titleLayout = BoxLayout(size_hint_y=0.05, padding=[0,30,0,0])
 
-        self.poemTitle = Label(size_hint_x=0.9, font_size='24sp')
+        self.poemTitle = Label(size_hint_x=0.9, font_size='18sp')
 
         titleLayout.add_widget(self.poemTitle)
         top_left.add_widget(titleLayout)
@@ -437,7 +437,7 @@ class RhythmScreen(BoxLayout):
 
         titleLayout = BoxLayout(size_hint_y=0.05)
 
-        self.poemTitle = Label(size_hint_x=0.9, font_size='24sp')
+        self.poemTitle = Label(size_hint_x=0.9, font_size='18sp')
 
         titleLayout.add_widget(self.poemTitle)
         self.add_widget(titleLayout)
@@ -780,7 +780,8 @@ class PoemDisplay(GridLayout):
             for j in range(12):
                 syllable_widget = Label(
                     text='', 
-                    font_size='24sp')
+                    font_size='26sp',
+                    bold=True)
                 
                 display_row.append(syllable_widget)
                 self.add_widget(syllable_widget)
@@ -1061,7 +1062,6 @@ class EntryBox(BoxLayout):
             text='', 
             size_hint_x=13, 
             font_size='20sp',
-            bold=True,
             on_touch_up=self.selected)
 
         textWidgetBorder = BoxLayout(padding=[10,0])
