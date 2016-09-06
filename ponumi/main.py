@@ -153,6 +153,15 @@ class NameInputScreen(BoxLayout):
             size=['48dp', 0],
             spacing=2)
 
+        self.auto_generate_rhythm_btn = IconToggleButton(
+            size_hint=[None, None],
+            size=['48dp', '48dp'],
+            up_image='images/agr-no-alpha.png',
+            down_image='images/agr-no-alpha-glitch-inv.png',
+            on_release=self.agr_pressed)
+
+        play_controls.add_widget(self.auto_generate_rhythm_btn)
+
         play_controls.add_widget(VCSToggleButton(
             #text='loop',
             osc_address=osc_loop_address,
@@ -187,6 +196,15 @@ class NameInputScreen(BoxLayout):
 
 
         top_left.add_widget(poem_controls)
+
+        top.add_widget(VCSSlider(
+            osc_address='/bpm',
+            min=10,
+            max=800,
+            step=10,
+            show_value=True,
+            size_hint_x=0.1))
+
         top.add_widget(top_left)
         
         top.add_widget(play_controls)
@@ -199,6 +217,19 @@ class NameInputScreen(BoxLayout):
 
         app = kivy.app.App.get_running_app()        
         app.bind(poem_position=self.poem_position_changed)
+
+
+    def agr_pressed(self, widget, *args):
+        app = kivy.app.App.get_running_app
+        if widget.state == 'down':
+            print 'here! True'
+            app.auto_generate_rhythm = True
+        else:
+            print 'here! False'
+            app.auto_generate_rhythm = False
+
+        print "app.agr is now", app.auto_generate_rhythm
+
 
     def poem_position_changed(self, instance, value):
         if not self.poem_dirty:
@@ -250,7 +281,9 @@ class NameInputScreen(BoxLayout):
         self.poemDisplay.clear_highlight()
 
         app = kivy.app.App.get_running_app()
-        if app.auto_generate_rhythm:
+        print 'app.agre again:', app.auto_generate_rhythm
+        if app.auto_generate_rhythm == True:
+            print 'auto generating!'
             rhythm_root = make_rhythm_from_syllables(self.poem.root_name)
 
             #make sure the rhythm root isn't completely silent
@@ -766,7 +799,8 @@ class PoemDisplay(GridLayout):
         super(PoemDisplay, self).__init__(**kwargs)
 
         self.cols = 12
-        self.padding = [100, 20]
+        self.padding = [70, 20]
+        self.spacing = 12
 
         self.display_syllables = []
 
