@@ -157,8 +157,7 @@ class NameInputScreen(BoxLayout):
             size_hint=[None, None],
             size=['48dp', '48dp'],
             up_image='images/agr-no-alpha.png',
-            down_image='images/agr-no-alpha-glitch-inv.png',
-            on_release=self.agr_pressed)
+            down_image='images/agr-no-alpha-glitch-inv.png')
 
         play_controls.add_widget(self.auto_generate_rhythm_btn)
 
@@ -219,18 +218,6 @@ class NameInputScreen(BoxLayout):
         app.bind(poem_position=self.poem_position_changed)
 
 
-    def agr_pressed(self, widget, *args):
-        app = kivy.app.App.get_running_app
-        if widget.state == 'down':
-            print 'here! True'
-            app.auto_generate_rhythm = True
-        else:
-            print 'here! False'
-            app.auto_generate_rhythm = False
-
-        print "app.agr is now", app.auto_generate_rhythm
-
-
     def poem_position_changed(self, instance, value):
         if not self.poem_dirty:
             x = value % 12 
@@ -281,9 +268,9 @@ class NameInputScreen(BoxLayout):
         self.poemDisplay.clear_highlight()
 
         app = kivy.app.App.get_running_app()
-        print 'app.agre again:', app.auto_generate_rhythm
-        if app.auto_generate_rhythm == True:
-            print 'auto generating!'
+
+        if self.auto_generate_rhythm_btn.state == 'down':
+            print 'auto generating rhythm!'
             rhythm_root = make_rhythm_from_syllables(self.poem.root_name)
 
             #make sure the rhythm root isn't completely silent
@@ -303,7 +290,6 @@ class ConfigScreen(BoxLayout):
 
     osc_ip_address = ObjectProperty(None)
     osc_port = ObjectProperty(None)
-    auto_generate_rhythm = ObjectProperty(None)
 
 
     def __init__(self, **kwargs):
@@ -315,11 +301,6 @@ class ConfigScreen(BoxLayout):
 
         self.osc_ip_address.text = app.osc_ip_address
         self.osc_port.text = app.osc_port
-        if app.auto_generate_rhythm:
-            self.auto_generate_rhythm.state = 'down'
-        else:
-            self.auto_generate_rhythm.state = 'normal'
-
 
 
     def save_pressed(self, *args):
@@ -327,7 +308,6 @@ class ConfigScreen(BoxLayout):
 
         app.osc_ip_address = self.osc_ip_address.text
         app.osc_port = self.osc_port.text
-        app.auto_generate_rhythm = self.auto_generate_rhythm.state == 'down'
 
         app.save_config()
 
@@ -1436,8 +1416,7 @@ class PonumiPerformer(App):
 
         self.config_store.put('config', 
             osc_ip_address=self.osc_ip_address,
-            osc_port=self.osc_port,
-            auto_generate_rhythm=self.auto_generate_rhythm)
+            osc_port=self.osc_port)
 
 
     def load_config(self):
@@ -1447,13 +1426,11 @@ class PonumiPerformer(App):
 
             if 'osc_ip_address' in config: self.osc_ip_address = config['osc_ip_address']
             if 'osc_port' in config: self.osc_port = config['osc_port']
-            if 'auto_generate_rhythm' in config: self.auto_generate_rhythm = config['auto_generate_rhythm']
 
 
     def load_default_config(self):
         self.osc_ip_address = _default_osc_ip_address
         self.osc_port = _default_osc_port
-        self.auto_generate_rhythm = _default_auto_generate_rhythm
 
     def on_stop(self):
         self.shutdown_osc()
