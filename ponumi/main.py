@@ -31,6 +31,7 @@ import kivy.lib.osc.oscAPI as oscAPI
 
 from os.path import join
 from functools import partial
+from time import sleep
 
 import ponumi
 import ponumi_osc
@@ -51,6 +52,9 @@ osc_stop_address = '/stop'
 osc_loop_address = '/loop'
 osc_rhythmenable_address = '/rhythmenable'
 osc_eolpause_address = '/pause'
+osc_listen_port = 3000
+osc_horizontal_poem_position = '/horizontalposition'
+osc_vertical_poem_position = '/verticalposition'
 
 _osc_go_delay = 0.01     #seconds
 
@@ -94,6 +98,7 @@ class NameInputScreen(BoxLayout):
     def __init__(self, **kwargs):
         super(NameInputScreen, self).__init__(**kwargs)
 
+        self.poem_dirty = False
         self.poem = None
         
         self.orientation = 'vertical'
@@ -196,6 +201,15 @@ class NameInputScreen(BoxLayout):
             on_keyboard_down=self.syllable_btn_pressed,
             on_keyboard_up=self.syllable_btn_released))
 
+        app = kivy.app.App.get_running_app()        
+        app.bind(poem_position=self.poem_position_changed)
+
+    def poem_position_changed(self, instance, value):
+        if not self.poem_dirty:
+            x = value % 12 
+            y = int(value / 12)
+            self.poemDisplay.highlight_syllable(x, y)
+
 
     def generate_and_show_poem(self, root_name, ancestor):
         self.poem = ponumi.create_poem(root_name, [ancestor])        
@@ -236,6 +250,10 @@ class NameInputScreen(BoxLayout):
             else:
                 self.generate_and_show_poem(_ancestor, _ancestor)
 
+
+        self.poem_dirty = True
+        self.poemDisplay.clear_highlight()
+
         app = kivy.app.App.get_running_app()
         if app.auto_generate_rhythm:
             rhythm_root = make_rhythm_from_syllables(self.poem.root_name)
@@ -247,8 +265,9 @@ class NameInputScreen(BoxLayout):
 
 
 
-    def send_pressed(self, *args):
 
+    def send_pressed(self, *args):
+        self.poem_dirty = False
         if self.poem:
             play_poem_via_osc(self.poem)
 
@@ -749,29 +768,29 @@ class PoemDisplay(GridLayout):
             for j in range(12):
                 syllable_widget = Label(
                     text='', 
-                    font_size='24sp', 
-                    on_touch_up=self.selected)
+                    font_size='24sp')
                 
                 display_row.append(syllable_widget)
                 self.add_widget(syllable_widget)
 
             self.display_syllables.append(display_row)
 
-            #App.get_running_app().bind(input_focus=self.on_focus)
 
-    def selected(self, widget, value):
-        App.get_running_app().input_focus = widget
+    def clear_highlight(self):
+        for row in self.display_syllables:
+            for syllable_widget in row:
+                if syllable_widget.color == [1., 0, 0, 1.]:
+                    syllable_widget.color = [1., 1., 1., 1.]
 
 
-    def on_focus(self, widget, focussed_widget):
+    def highlight_syllable(self,x,y):
+        self.clear_highlight()
 
-        if is_descendent(focussed_widget, self):
-            with focussed_widget.canvas.before:
-                Color(1., 1., 1.)
-                Rectangle(pos=focussed_widget.pos, size=focussed_widget.size)
-        else:
-            focussed_widget.canvas.clear()
-
+        if self.display_syllables and \
+            len(self.display_syllables) > y and \
+            len(self.display_syllables[y]) > x: 
+            
+            self.display_syllables[y][x].color = [1., 0, 0, 1.]
 
     def on_syllables(self, instance, value):
         #if syllables is a 1D array turn it into a 2D array
@@ -1207,7 +1226,7 @@ def set_osc_indicator(state, *args):
     app.osc_indicator.icon = path
 
 
-def send_osc_message(osc_address, msg):
+def send_osc_message(osc_address, msg, typehint=None):
 
     app = kivy.app.App.get_running_app()
     ip_address = app.osc_ip_address
@@ -1219,7 +1238,7 @@ def send_osc_message(osc_address, msg):
             dataArray=msg, 
             ipAddr=ip_address, 
             port=port, 
-            typehint=None)
+            typehint=typehint)
 
         print "\nsent:"
         print msg
@@ -1298,12 +1317,32 @@ class PonumiPerformer(App):
 
     input_focus = ObjectProperty(None)
 
+    poem_position = NumericProperty(0)
+
     def __init__(self, **kwargs):
         super(PonumiPerformer, self).__init__(**kwargs)
         data_dir = getattr(self, 'user_data_dir')
         self.config_store = JsonStore(join(data_dir, 'ponumiperformer.json'))
         self.rhythm = _default_rhythm
         oscAPI.init()
+
+        oscid = oscAPI.listen(ipAddr='127.0.0.1', port=osc_listen_port)
+        oscAPI.bind(oscid, self.position_changed, '/poemposition')
+        #oscAPI.bind(oscid, self.position_changed, osc_vertical_poem_position)
+        Clock.schedule_interval(lambda *x: oscAPI.readQueue(oscid), 0.01)
+
+        send_osc_message('/osc/respond_to', [osc_listen_port])
+        send_osc_message('/poemposition', [0.0001], typehint=1.0)
+        # send_osc_message(osc_horizontal_poem_position, [0.0001], typehint=1.0)
+        # send_osc_message(osc_vertical_poem_position, [0.0001], typehint=1.0)
+
+
+
+    def position_changed(self, msg, *args):
+        print 'position changed!', msg, args
+        self.poem_position = int(msg[2])
+
+
 
 
     def build(self):
