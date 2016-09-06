@@ -146,6 +146,36 @@ class NameInputScreen(BoxLayout):
             down_image='images/send-no-alpha-glitch-inv-red.png', 
             on_release=self.send_pressed))
 
+
+        play_controls = BoxLayout(
+            orientation='vertical', 
+            size_hint_x=None,
+            size=['48dp', 0],
+            spacing=2)
+
+        play_controls.add_widget(VCSToggleButton(
+            #text='loop',
+            osc_address=osc_loop_address,
+            size_hint=[None, None],
+            size=['48dp', '48dp'],
+            up_image='images/loop-no-alpha.png',
+            down_image='images/loop-no-alpha-glitch-inv.png'))
+
+        play_controls.add_widget(VCSToggleButton(
+            #text='rhythmenable',
+            osc_address=osc_rhythmenable_address,
+            size_hint=[None, None],
+            size=['48dp', '48dp'],
+            up_image='images/rhythmenable-no-alpha.png',
+            down_image='images/rhythmenable-no-alpha-glitch-inv.png'))
+
+        play_controls.add_widget(VCSToggleButton(
+            osc_address=osc_eolpause_address,
+            size_hint=[None, None],
+            size=['48dp', '48dp'],
+            up_image='images/eolpause-no-alpha.png',
+            down_image='images/eolpause-no-alpha-glitch-inv.png'))
+
         self.hear_button = IconToggleButton(
             #text='hear',
             size_hint=[None, None],
@@ -153,47 +183,13 @@ class NameInputScreen(BoxLayout):
             up_image='images/hear-no-alpha.png',
             down_image='images/hear-no-alpha-glitch-inv.png')
 
-        poem_controls.add_widget(self.hear_button)
-
-
-
-        # play_controls = BoxLayout(
-        #     orientation='vertical', 
-        #     size_hint_x=None,
-        #     size=['48dp', 0],
-        #     spacing=2)
-
-
-        # play_controls.add_widget(VCSButton(
-        #     #text='stop',
-        #     osc_address=osc_stop_address,
-        #     size_hint=[None, None],
-        #     size=['48dp', '48dp'],
-        #     up_image='images/stop-no-alpha.png',
-        #     down_image='images/stop-no-alpha-glitch-inv-red.png'))
-
-        # play_controls.add_widget(VCSToggleButton(
-        #     #text='loop',
-        #     osc_address=osc_loop_address,
-        #     size_hint=[None, None],
-        #     size=['48dp', '48dp'],
-        #     up_image='images/loop-no-alpha.png',
-        #     down_image='images/loop-no-alpha-glitch-inv.png'))
-
-        # play_controls.add_widget(VCSToggleButton(
-        #     #text='rhythmenable',
-        #     osc_address=osc_rhythmenable_address,
-        #     size_hint=[None, None],
-        #     size=['48dp', '48dp'],
-        #     up_image='images/rhythmenable-no-alpha.png',
-        #     down_image='images/rhythmenable-no-alpha-glitch-inv.png'))
-
+        play_controls.add_widget(self.hear_button)
 
 
         top_left.add_widget(poem_controls)
         top.add_widget(top_left)
         
-        # top.add_widget(play_controls)
+        top.add_widget(play_controls)
 
         self.add_widget(top)
         self.add_widget(SyllableKeyboard(
