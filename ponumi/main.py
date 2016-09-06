@@ -53,8 +53,8 @@ osc_loop_address = '/loop'
 osc_rhythmenable_address = '/rhythmenable'
 osc_eolpause_address = '/pause'
 osc_listen_port = 3000
-osc_horizontal_poem_position = '/horizontalposition'
-osc_vertical_poem_position = '/verticalposition'
+osc_poem_position = '/poemposition'
+osc_rhythm_position = '/rhythmposition'
 
 _osc_go_delay = 0.01     #seconds
 
@@ -230,7 +230,6 @@ class NameInputScreen(BoxLayout):
             send_osc_syllable_gate_off()
 
 
-
     def enter_pressed(self, *args):
         global _ancestor
 
@@ -262,8 +261,6 @@ class NameInputScreen(BoxLayout):
             if not '1' in rhythm_root:
                 rhythm_root = ['1', '0']
             app.rhythm = make_rhythm(rhythm_root)
-
-
 
 
     def send_pressed(self, *args):
@@ -304,6 +301,12 @@ class ConfigScreen(BoxLayout):
         app.auto_generate_rhythm = self.auto_generate_rhythm.state == 'down'
 
         app.save_config()
+
+
+    def reinitialise_osc_pressed(self, *args):
+        app = kivy.app.App.get_running_app()
+        app.shutdown_osc()
+        app.initialise_osc()        
 
 
 class ManualScreen(BoxLayout):
@@ -483,6 +486,15 @@ class RhythmScreen(BoxLayout):
         self.add_widget(RhythmKeyboard(
             size_hint_y=0.55, 
             on_keyboard_up=self.keyboard_btn_released))
+
+        app = kivy.app.App.get_running_app()        
+        app.bind(rhythm_position=self.rhythm_position_changed)
+
+
+    def rhythm_position_changed(self, instance, value):
+        x = value % 12 
+        y = int(value / 12)
+        self.rhythm_display.highlight_syllable(x, y)
 
 
     def refresh_form(self, *args):
@@ -847,6 +859,28 @@ class RhythmDisplay(GridLayout):
                 self.add_widget(syllable_widget)
 
             self.display_syllables.append(display_row)
+
+
+    def clear_highlight(self):
+        for row in self.display_syllables:
+            for syllable_widget in row:
+                syllable_widget.canvas.after.clear()
+
+
+    def highlight_syllable(self,x,y):
+        self.clear_highlight()
+
+        if self.display_syllables and \
+            len(self.display_syllables) > y and \
+            len(self.display_syllables[y]) > x: 
+            
+            syllable_widget = self.display_syllables[y][x]
+            
+            with syllable_widget.canvas.after:
+                Color(1., 0, 0)
+                Rectangle(
+                    size=[syllable_widget.size[0] - 20, syllable_widget.size[1] - 20],
+                    pos=[syllable_widget.pos[0] + 10, syllable_widget.pos[1] + 10])
 
 
     def button_pressed(self, *args):
@@ -1318,31 +1352,40 @@ class PonumiPerformer(App):
     input_focus = ObjectProperty(None)
 
     poem_position = NumericProperty(0)
+    rhythm_position = NumericProperty(0)
 
     def __init__(self, **kwargs):
         super(PonumiPerformer, self).__init__(**kwargs)
         data_dir = getattr(self, 'user_data_dir')
         self.config_store = JsonStore(join(data_dir, 'ponumiperformer.json'))
         self.rhythm = _default_rhythm
+
+        self.initialise_osc()
+
+
+    def initialise_osc(self):
         oscAPI.init()
 
         oscid = oscAPI.listen(ipAddr='127.0.0.1', port=osc_listen_port)
-        oscAPI.bind(oscid, self.position_changed, '/poemposition')
-        #oscAPI.bind(oscid, self.position_changed, osc_vertical_poem_position)
-        Clock.schedule_interval(lambda *x: oscAPI.readQueue(oscid), 0.01)
+        oscAPI.bind(oscid, self.poem_position_changed, osc_poem_position)
+        oscAPI.bind(oscid, self.rhythm_position_changed, osc_rhythm_position)
+        self.osc_poll = Clock.schedule_interval(lambda *x: oscAPI.readQueue(oscid), 0.01)
 
         send_osc_message('/osc/respond_to', [osc_listen_port])
-        send_osc_message('/poemposition', [0.0001], typehint=1.0)
-        # send_osc_message(osc_horizontal_poem_position, [0.0001], typehint=1.0)
-        # send_osc_message(osc_vertical_poem_position, [0.0001], typehint=1.0)
+        send_osc_message(osc_poem_position, [0.0001], typehint=1.0)
+        send_osc_message(osc_rhythm_position, [0.0001], typehint=1.0)
 
 
+    def shutdown_osc(self):
+        self.osc_poll.cancel()
+        oscAPI.dontListen()
 
-    def position_changed(self, msg, *args):
-        print 'position changed!', msg, args
+
+    def poem_position_changed(self, msg, *args):
         self.poem_position = int(msg[2])
 
-
+    def rhythm_position_changed(self, msg, *args):
+        self.rhythm_position = int(msg[2])
 
 
     def build(self):
@@ -1381,6 +1424,11 @@ class PonumiPerformer(App):
         self.osc_ip_address = _default_osc_ip_address
         self.osc_port = _default_osc_port
         self.auto_generate_rhythm = _default_auto_generate_rhythm
+
+    def on_stop(self):
+        self.shutdown_osc()
+
+
 
 
 
